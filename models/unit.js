@@ -33,10 +33,6 @@ const UnitModel = Mongo.model('Unit', {
     type: Array,
     required: true,
   },
-  notifyImmediately: {
-    type: Boolean,
-    required: true,
-  },
 });
 
 module.exports = UnitModel;

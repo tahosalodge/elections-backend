@@ -13,6 +13,10 @@ const ElectionModel = Mongo.model('Election', {
     type: Number,
     required: true,
   },
+  notifyImmediately: {
+    type: Boolean,
+    required: true,
+  },
   date: {
     type: Date,
     required: true,
