@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-mongoose.promise = global.promise;
+mongoose.Promise = global.Promise;
 const conn = mongoose.createConnection(process.env.DATABASE, {
   useMongoClient: true,
 });
