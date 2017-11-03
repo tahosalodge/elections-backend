@@ -23,10 +23,10 @@ const UserModel = Mongo.model('User', {
     type: String,
     required: true,
   },
-  capabilities: {
-    type: Array,
+  capability: {
+    type: String,
     required: true,
-    default: ['unit'],
+    default: 'unit',
   },
   password: String,
   resetPasswordToken: String,

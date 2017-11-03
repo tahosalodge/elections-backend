@@ -19,7 +19,7 @@ exports.login = async (req, res) => {
       expiresIn: 86400,
     });
 
-    return res.status(200).send({ auth: true, token });
+    return res.status(200).send({ auth: true, token, capability: user.capability });
   } catch (e) {
     return res.status(500).send('Error on the server.');
   }
