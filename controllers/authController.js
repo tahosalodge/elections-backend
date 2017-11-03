@@ -3,15 +3,12 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 
-exports.login = (req, res) => {
-  User.findOne({ email: req.body.email }, (err, user) => {
-    if (err) {
-      return res.status(500).send('Error on the server.');
-    }
+exports.login = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
     if (!user) {
       return res.status(404).send('No user found.');
     }
-
     // check if the password is valid
     const passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
     if (!passwordIsValid) {
@@ -23,39 +20,44 @@ exports.login = (req, res) => {
     });
 
     return res.status(200).send({ auth: true, token });
-  });
+  } catch (e) {
+    return res.status(500).send('Error on the server.');
+  }
 };
 
-exports.register = (req, res) => {
-  const hashedPassword = bcrypt.hashSync(req.body.password, 8);
-
-  User.create(
-    {
-      name: req.body.name,
-      email: req.body.email,
-      password: hashedPassword,
-    },
-    (err, user) => {
-      if (err) {
-        return res.status(500).send('There was a problem registering the user.');
-      }
-      // eslint-disable-next-line no-underscore-dangle
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: 86400 });
-      return res.status(200).send({ auth: true, token });
-    },
-  );
+exports.register = async (req, res) => {
+  const {
+    lname, fname, email, password, chapter,
+  } = req.body;
+  const hashedPassword = bcrypt.hashSync(password, 8);
+  const createuserData = {
+    fname,
+    lname,
+    email,
+    chapter,
+    password: hashedPassword,
+  };
+  try {
+    const user = await User.create(createuserData);
+    // eslint-disable-next-line no-underscore-dangle
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: 86400 });
+    return res.status(200).send({ auth: true, token });
+  } catch (err) {
+    return res.status(500).send('There was a problem registering the user.');
+  }
 };
 
-exports.me = (req, res) => {
-  User.findById(req.userId, { password: 0 }, (err, user) => {
-    if (err) {
-      return res.status(500).send('There was a problem finding the user.');
-    }
+exports.me = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId, { password: 0 });
+
     if (!user) {
       return res.status(404).send('No user found');
     }
     return res.status(200).send(user);
-  });
+  } catch (e) {
+    return res.status(500).send('There was a problem finding the user.');
+  }
 };
 
 exports.verifyToken = (req, res, next) => {
