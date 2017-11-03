@@ -11,7 +11,6 @@ const UserModel = Mongo.model('User', {
   },
   phone: {
     type: String,
-    required: true,
   },
   email: {
     type: String,
@@ -27,6 +26,7 @@ const UserModel = Mongo.model('User', {
   capabilities: {
     type: Array,
     required: true,
+    default: ['unit'],
   },
   password: String,
   resetPasswordToken: String,
