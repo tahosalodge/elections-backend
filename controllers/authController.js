@@ -3,21 +3,26 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 
+function createToken(user) {
+  const { _id: userId, capability: userCap } = user;
+  return jwt.sign({ userId, userCap }, process.env.JWT_SECRET, { expiresIn: 86400 });
+}
+
 exports.login = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).send('Missing parameters.');
+    }
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).send('No user found.');
     }
-    // check if the password is valid
-    const passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
+    const passwordIsValid = bcrypt.compareSync(password, user.password);
     if (!passwordIsValid) {
       return res.status(401).send({ auth: false, token: null });
     }
-    // eslint-disable-next-line no-underscore-dangle
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: 86400,
-    });
+    const token = createToken(user);
 
     return res.status(200).send({ auth: true, token, capability: user.capability });
   } catch (e) {
@@ -39,8 +44,7 @@ exports.register = async (req, res) => {
   };
   try {
     const user = await User.create(createuserData);
-    // eslint-disable-next-line no-underscore-dangle
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: 86400 });
+    const token = createToken(user);
     return res.status(200).send({ auth: true, token });
   } catch (err) {
     return res.status(500).send('There was a problem registering the user.');
@@ -68,12 +72,12 @@ exports.verifyToken = (req, res, next) => {
   if (!token) {
     return res.status(403).send({ auth: false, message: 'No token provided.' });
   }
-  // eslint-disable-next-line
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
-    }
-    req.userId = decoded.id;
-  });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.userId;
+    req.userCap = decoded.userCap;
+  } catch (err) {
+    return res.status(403).send({ auth: false, message: 'Failed to authenticate token.' });
+  }
   return next();
 };

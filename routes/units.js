@@ -2,12 +2,14 @@ const { Router } = require('express');
 const bodyParser = require('body-parser');
 const Unit = require('../models/unit');
 const CRUD = require('../controllers/CRUDController');
+const UnitController = require('../controllers/UnitController');
+const AuthController = require('../controllers/authController');
 
 const router = Router();
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
-router.get('/', CRUD.getAll(Unit));
+router.get('/', AuthController.verifyToken, UnitController.getAll);
 
 router.get('/:id', CRUD.getOne(Unit));
 
