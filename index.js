@@ -1,6 +1,7 @@
 require('dotenv').config({ path: '.env' });
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const candidateRoutes = require('./routes/candidates');
 const electionRoutes = require('./routes/elections');
 const nominationRoutes = require('./routes/nominations');
@@ -20,6 +21,7 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
+app.use(cors());
 app.get('/', (req, res) => res.send('Hello world!'));
 app.use('/candidates', candidateRoutes);
 app.use('/elections', electionRoutes);
