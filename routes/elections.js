@@ -2,12 +2,13 @@ const { Router } = require('express');
 const bodyParser = require('body-parser');
 const Elections = require('../models/election');
 const CRUD = require('../controllers/CRUDController');
+const ElectionController = require('../controllers/ElectionController');
 
 const router = Router();
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
-router.get('/', CRUD.getAll(Elections));
+router.get('/', ElectionController.getAll());
 
 router.get('/:id', CRUD.getOne(Elections));
 

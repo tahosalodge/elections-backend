@@ -23,6 +23,9 @@ const UserModel = Mongo.model('User', {
     type: String,
     required: true,
   },
+  unit: {
+    type: String,
+  },
   capability: {
     type: String,
     required: true,

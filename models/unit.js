@@ -33,6 +33,9 @@ const UnitModel = Mongo.model('Unit', {
     type: Array,
     required: true,
   },
+  pendingUsers: {
+    type: Array,
+  },
 });
 
 module.exports = UnitModel;
