@@ -1,12 +1,5 @@
 const Unit = require('../models/unit');
-
-const handleRequest = res => (err, response) => {
-  if (err) {
-    return res.status(err.status || 500).send(err);
-  }
-
-  return res.status(200).send(response || {});
-};
+const handleRequest = require('../helpers/handleRequest');
 
 exports.getAll = (req, res) => {
   if (req.userCap === 'unit') {
