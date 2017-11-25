@@ -4,8 +4,12 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 function createToken(user) {
-  const { _id: userId, capability: userCap } = user;
-  return jwt.sign({ userId, userCap }, process.env.JWT_SECRET, { expiresIn: 86400 });
+  const { _id: userId, capability: userCap, unit: userUnit } = user;
+  const tokenVars = { userId, userCap };
+  if (userCap === 'unit') {
+    tokenVars.userUnit = userUnit;
+  }
+  return jwt.sign(tokenVars, process.env.JWT_SECRET, { expiresIn: 86400 });
 }
 
 exports.login = async (req, res) => {
