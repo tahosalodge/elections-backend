@@ -24,11 +24,11 @@ exports.login = async (req, res) => {
     }
     const passwordIsValid = bcrypt.compareSync(password, user.password);
     if (!passwordIsValid) {
-      return res.status(401).send({ auth: false, token: null });
+      return res.status(401).send();
     }
     const token = createToken(user);
 
-    return res.status(200).send({ auth: true, token, capability: user.capability });
+    return res.status(200).send({ token, ...user });
   } catch (e) {
     return res.status(500).send('Error on the server.');
   }
