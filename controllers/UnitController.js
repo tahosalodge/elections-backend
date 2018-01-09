@@ -1,10 +1,12 @@
 const Unit = require('../models/unit');
 const handleRequest = require('../helpers/handleRequest');
 
-exports.getAll = (req, res) => {
+exports.getAll = async (req, res) => {
   if (req.userCap === 'unit') {
-    Unit.find({}, ['number', 'district'], handleRequest(res));
+    await Unit.find({}, ['number', 'district'], handleRequest(res));
   } else {
-    Unit.find(handleRequest(res));
+    await Unit.find(handleRequest(res));
   }
 };
+
+// exports.create = (req, res) => {};
