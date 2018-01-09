@@ -5,7 +5,7 @@ const UnitModel = Mongo.model('Unit', {
     type: String,
     required: true,
   },
-  district: {
+  chapter: {
     type: String,
     required: true,
   },

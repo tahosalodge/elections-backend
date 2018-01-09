@@ -9,29 +9,25 @@ const ElectionModel = Mongo.model('Election', {
     type: Array,
     required: true,
   },
+  season: {
+    type: String,
+    required: true,
+  },
   status: {
-    type: Number,
+    type: String,
     required: true,
   },
   notifyImmediately: {
     type: Boolean,
-    required: true,
   },
   date: {
     type: Date,
-    required: true,
-  },
-  youthRegistered: {
-    type: Number,
-    required: true,
   },
   youthAttendance: {
     type: Number,
-    required: true,
   },
   election1Ballots: {
     type: Number,
-    required: true,
   },
   election2Ballots: {
     type: Number,
