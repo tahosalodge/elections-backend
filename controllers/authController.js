@@ -27,8 +27,9 @@ exports.login = async (req, res) => {
       return res.status(401).send();
     }
     const token = createToken(user);
+    const { unit, capability } = user;
 
-    return res.status(200).send({ token, ...user });
+    return res.status(200).send({ token, unit, capability });
   } catch (e) {
     return res.status(500).send('Error on the server.');
   }
