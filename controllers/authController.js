@@ -16,22 +16,22 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).send('Missing parameters.');
+      return res.status(400).send({ message: 'Missing parameters.' });
     }
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).send('No user found.');
+      return res.status(404).send({ message: 'No user found.' });
     }
     const passwordIsValid = bcrypt.compareSync(password, user.password);
     if (!passwordIsValid) {
-      return res.status(401).send();
+      return res.status(401).send({ message: 'Password incorrect.' });
     }
     const token = createToken(user);
     const { unit, capability } = user;
 
     return res.status(200).send({ token, unit, capability });
   } catch (e) {
-    return res.status(500).send('Error on the server.');
+    return res.status(500).send({ message: 'Error on the server.' });
   }
 };
 
@@ -51,8 +51,9 @@ exports.register = async (req, res) => {
     const user = await User.create(createuserData);
     const token = createToken(user);
     return res.status(200).send({ auth: true, token });
-  } catch (err) {
-    return res.status(500).send('There was a problem registering the user.');
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send(error.message);
   }
 };
 
@@ -85,4 +86,9 @@ exports.verifyToken = (req, res, next) => {
     return res.status(403).send({ auth: false, message: 'Failed to authenticate token.' });
   }
   return next();
+};
+
+exports.updateUser = async (userId, patch) => {
+  const updatedUser = await User.findOneAndUpdate({ _id: userId }, patch);
+  return updatedUser;
 };
