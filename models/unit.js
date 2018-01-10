@@ -17,7 +17,7 @@ const UnitModel = Mongo.model('Unit', {
     type: Object,
     required: true,
   },
-  unitleader: {
+  unitLeader: {
     type: Object,
     required: true,
   },
