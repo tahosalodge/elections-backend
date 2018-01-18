@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
+const Notify = require('../helpers/notify');
 const User = require('../models/user');
 
 function createToken(user) {
@@ -28,7 +28,6 @@ exports.login = async (req, res) => {
     }
     const token = createToken(user);
     const { unit, capability } = user;
-
     return res.status(200).send({ token, unit, capability });
   } catch (e) {
     return res.status(500).send({ message: 'Error on the server.' });
@@ -37,7 +36,7 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   const {
-    lname, fname, email, password, chapter,
+    lname, fname, email, password, chapter, capability,
   } = req.body;
   const hashedPassword = bcrypt.hashSync(password, 8);
   const createuserData = {
@@ -45,12 +44,18 @@ exports.register = async (req, res) => {
     lname,
     email,
     chapter,
+    capability,
     password: hashedPassword,
   };
   try {
     const user = await User.create(createuserData);
     const token = createToken(user);
-    return res.status(200).send({ auth: true, token });
+    new Notify(email).sendEmail(
+      'Thanks for registering with Tahosa Lodge Elections',
+      `Hey ${fname}, thanks for registering with Tahosa Lodge Elections. If you have any questions or issues, please contact us at elections@tahosalodge.org.`,
+    );
+
+    return res.status(200).send({ token, capability });
   } catch (error) {
     console.log(error);
     return res.status(500).send(error.message);

@@ -1,6 +1,7 @@
 const Unit = require('../models/unit');
 const AuthController = require('./authController');
 const handleRequest = require('../helpers/handleRequest');
+const Notify = require('../helpers/notify');
 
 exports.getAll = async (req, res) => {
   const { userCap } = req;
@@ -17,9 +18,14 @@ exports.create = async (req, res) => {
     ...req.body,
     users: [userId],
   };
-  const created = await new Unit(toCreate);
+  const unit = await new Unit(toCreate);
   if (userCap === 'unit') {
-    AuthController.updateUser(userId, { unit: created._id });
+    const user = AuthController.updateUser(userId, { unit: unit._id });
+    new Notify(user.email).sendEmail(
+      'Tahosa Lodge Elections - Unit Created',
+      `Hey ${user.fname}, your unit ${unit.number}
+      has been created. You can access it here: https://elections.tahosa.co/units/${unit._id} `,
+    );
   }
-  return created.save(handleRequest(res));
+  return unit.save(handleRequest(res));
 };
