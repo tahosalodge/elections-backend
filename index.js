@@ -2,6 +2,7 @@ require('dotenv').config({ path: '.env' });
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const Raven = require('raven');
 const candidateRoutes = require('./routes/candidates');
 const electionRoutes = require('./routes/elections');
 const nominationRoutes = require('./routes/nominations');
@@ -11,9 +12,11 @@ const authRoutes = require('./routes/auth');
 const app = express();
 require('dotenv').config({ path: '.env' });
 
+Raven.config(process.env.SENTRY_DSN).install();
 app.set('port', process.env.PORT || 4001);
 app.set('router', express.Router);
 
+app.use(Raven.requestHandler());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use((req, res, next) => {
@@ -28,5 +31,7 @@ app.use('/elections', electionRoutes);
 app.use('/nominations', nominationRoutes);
 app.use('/units', unitRoutes);
 app.use('/auth', authRoutes);
+
+app.use(Raven.errorHandler());
 
 app.listen(app.get('port'));
