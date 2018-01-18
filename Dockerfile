@@ -9,4 +9,4 @@ RUN mv /app/node_modules /node_modules
 
 COPY . /app
 
-CMD ["yarn", "start"]
+CMD ["yarn", "prod"]

@@ -24,6 +24,7 @@
   },
   "scripts": {
     "prod": "node index.js",
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "docker-build": "sh build.sh"
   }
 }
