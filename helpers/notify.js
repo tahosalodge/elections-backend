@@ -19,6 +19,7 @@ class Notify {
     const options = {
       from: FROM_EMAIL,
       to: this.toAddress,
+      subject,
       html: message,
     };
     mailer
