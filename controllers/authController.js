@@ -97,3 +97,8 @@ exports.updateUser = async (userId, patch) => {
   const updatedUser = await User.findOneAndUpdate({ _id: userId }, patch);
   return updatedUser;
 };
+
+exports.getUser = async (userId) => {
+  const user = await User.find({ _id: userId });
+  return user;
+};
