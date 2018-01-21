@@ -8,9 +8,9 @@ const electionRoutes = require('./routes/elections');
 const nominationRoutes = require('./routes/nominations');
 const unitRoutes = require('./routes/units');
 const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
-require('dotenv').config({ path: '.env' });
 
 Raven.config(process.env.SENTRY_DSN).install();
 app.set('port', process.env.PORT || 4001);
@@ -31,6 +31,7 @@ app.use('/elections', electionRoutes);
 app.use('/nominations', nominationRoutes);
 app.use('/units', unitRoutes);
 app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
 
 app.use(Raven.errorHandler());
 
