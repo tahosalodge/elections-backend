@@ -1,9 +1,12 @@
-const Mongo = require('./index');
+const uniqueValidator = require('mongoose-unique-validator');
+const mongoose = require('./index');
+const { Schema } = require('mongoose');
 
-const UnitModel = Mongo.model('Unit', {
+const unitSchema = new Schema({
   number: {
     type: String,
     required: true,
+    unique: true,
   },
   chapter: {
     type: String,
@@ -38,4 +41,6 @@ const UnitModel = Mongo.model('Unit', {
   },
 });
 
+unitSchema.plugin(uniqueValidator);
+const UnitModel = mongoose.model('Unit', unitSchema);
 module.exports = UnitModel;
