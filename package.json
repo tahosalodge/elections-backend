@@ -24,8 +24,8 @@
     "nodemon": "^1.12.1"
   },
   "scripts": {
-    "prod": "node index.js",
-    "start": "nodemon index.js",
-    "docker-build": "sh build.sh"
+    "prod": "node src/index.js",
+    "start": "nodemon src/index.js",
+    "docker-build": "sh scripts/build.sh"
   }
 }
