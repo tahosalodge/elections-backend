@@ -432,6 +432,10 @@ circular-json@^0.3.1:
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/circular-json/-/circular-json-0.3.3.tgz#815c99ea84f6809529d2f45791bdf82711352d66"
 
+clarg@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/clarg/-/clarg-0.0.2.tgz#27f106a5635f251a0861e1943e8707c732d4a6d4"
+
 class-utils@^0.3.5:
   version "0.3.6"
   resolved "https://registry.yarnpkg.com/class-utils/-/class-utils-0.3.6.tgz#f93369ae8b9a7ce02fd41faad0ca83033190c463"
@@ -3355,6 +3359,12 @@ write@^0.2.1:
 xdg-basedir@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/xdg-basedir/-/xdg-basedir-3.0.0.tgz#496b2cc109eca8dbacfe2dc72b603c17c5870ad4"
+
+xkpasswd@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/xkpasswd/-/xkpasswd-1.0.4.tgz#2d1a680034145a1fa41f36ea9ba25252ff806a67"
+  dependencies:
+    clarg "0.0.2"
 
 xregexp@2.0.0:
   version "2.0.0"
