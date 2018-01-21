@@ -1,7 +1,9 @@
 const nodemailer = require('nodemailer');
 const mg = require('nodemailer-mailgun-transport');
 
-const { MAILGUN_KEY, MAILGUN_DOMAIN, FROM_EMAIL } = process.env;
+const {
+  MAILGUN_KEY, MAILGUN_DOMAIN, FROM_EMAIL, ADMIN_EMAIL, NODE_ENV,
+} = process.env;
 const mgAuth = {
   auth: {
     api_key: MAILGUN_KEY,
@@ -12,7 +14,11 @@ const mailer = nodemailer.createTransport(mg(mgAuth));
 
 class Notify {
   constructor(toAddress) {
-    this.toAddress = toAddress;
+    if (NODE_ENV === 'development') {
+      this.toAddress = ADMIN_EMAIL;
+    } else {
+      this.toAddress = toAddress;
+    }
   }
 
   sendEmail(subject, message) {
