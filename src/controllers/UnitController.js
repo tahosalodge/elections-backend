@@ -19,7 +19,8 @@ exports.create = async (body, userCap, userId) => {
   };
   const unit = await Unit.create(unitParams);
   if (userCap === 'unit') {
-    const user = AuthController.updateUser(userId, { unit: unit._id });
+    const user = await AuthController.updateUser(userId, { unit: unit._id });
+    console.log(user);
     new Notify(user.email).sendEmail(
       'Tahosa Lodge Elections - Unit Created',
       `Hey ${user.fname}, your unit ${unit.number}
