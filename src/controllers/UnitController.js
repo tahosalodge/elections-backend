@@ -12,13 +12,12 @@ exports.getAll = async (req, res) => {
   }
 };
 
-exports.create = async (req, res) => {
-  const { userCap, userId } = req;
-  const toCreate = {
-    ...req.body,
+exports.create = async (body, userCap, userId) => {
+  const unitParams = {
+    ...body,
     users: [userId],
   };
-  const unit = await new Unit(toCreate);
+  const unit = await Unit.create(unitParams);
   if (userCap === 'unit') {
     const user = AuthController.updateUser(userId, { unit: unit._id });
     new Notify(user.email).sendEmail(
@@ -27,5 +26,5 @@ exports.create = async (req, res) => {
       has been created. You can access it here: https://elections.tahosa.co/units/${unit._id} `,
     );
   }
-  return unit.save(handleRequest(res));
+  return unit;
 };

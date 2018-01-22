@@ -13,7 +13,15 @@ router.get('/', verifyToken, UnitController.getAll);
 
 router.get('/:id', verifyToken, CRUD.getOne(Unit));
 
-router.post('/', verifyToken, UnitController.create);
+router.post('/', verifyToken, async (req, res) => {
+  const { userCap, userId, body } = req;
+  try {
+    const unit = await UnitController.create(body, userCap, userId);
+    res.json(unit);
+  } catch (e) {
+    res.status(400).json(e.message);
+  }
+});
 
 router.put('/:id', verifyToken, CRUD.update(Unit));
 
