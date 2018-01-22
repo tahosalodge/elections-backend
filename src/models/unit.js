@@ -26,11 +26,9 @@ const unitSchema = new Schema({
   },
   adultRepresentative: {
     type: Object,
-    required: true,
   },
   youthRepresentative: {
     type: Object,
-    required: true,
   },
   users: {
     type: Array,
