@@ -28,9 +28,9 @@
     "nodemon": "^1.12.1"
   },
   "scripts": {
-    "prod": "node src/index.js",
-    "debug": "node --inspect src/index.js",
-    "start": "nodemon src/index.js",
+    "prod": "NODE_PATH=src/ node src/index.js",
+    "debug": "NODE_PATH=src/ node --inspect src/index.js",
+    "start": "NODE_PATH=src/ nodemon src/index.js",
     "docker-build": "sh scripts/build.sh",
     "lint": "eslint src/*"
   }
