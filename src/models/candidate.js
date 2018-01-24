@@ -1,6 +1,7 @@
-const Mongo = require('./index');
+const mongoose = require('./index');
+const { Schema } = require('mongoose');
 
-const CandidateModel = Mongo.model('Candidate', {
+const candidateSchema = new Schema({
   fname: {
     type: String,
     required: true,
@@ -80,4 +81,4 @@ const CandidateModel = Mongo.model('Candidate', {
   },
 });
 
-module.exports = CandidateModel;
+module.exports = mongoose.model('Candidate', candidateSchema);

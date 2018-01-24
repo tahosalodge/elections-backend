@@ -1,6 +1,7 @@
-const Mongo = require('./index');
+const mongoose = require('./index');
+const { Schema } = require('mongoose');
 
-const NominationModel = Mongo.model('Nomination', {
+const nominationSchema = new Schema({
   fname: {
     type: String,
     required: true,
@@ -80,4 +81,4 @@ const NominationModel = Mongo.model('Nomination', {
   },
 });
 
-module.exports = NominationModel;
+module.exports = mongoose.model('Nomination', nominationSchema);

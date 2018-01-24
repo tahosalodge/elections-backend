@@ -1,6 +1,7 @@
-const Mongo = require('./index');
+const mongoose = require('./index');
+const { Schema } = require('mongoose');
 
-const UserModel = Mongo.model('User', {
+const userSchema = new Schema({
   fname: {
     type: String,
     required: true,
@@ -36,4 +37,4 @@ const UserModel = Mongo.model('User', {
   resetPasswordExpires: Date,
 });
 
-module.exports = UserModel;
+module.exports = mongoose.model('User', userSchema);

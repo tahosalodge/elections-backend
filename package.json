@@ -29,7 +29,9 @@
   },
   "scripts": {
     "prod": "node src/index.js",
+    "debug": "node --inspect src/index.js",
     "start": "nodemon src/index.js",
-    "docker-build": "sh scripts/build.sh"
+    "docker-build": "sh scripts/build.sh",
+    "lint": "eslint src/*"
   }
 }

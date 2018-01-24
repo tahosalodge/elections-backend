@@ -40,5 +40,4 @@ const unitSchema = new Schema({
 });
 
 unitSchema.plugin(uniqueValidator);
-const UnitModel = mongoose.model('Unit', unitSchema);
-module.exports = UnitModel;
+module.exports = mongoose.model('Unit', unitSchema);

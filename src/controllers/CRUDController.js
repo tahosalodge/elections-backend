@@ -1,26 +1,41 @@
-const handleRequest = require('../helpers/handleRequest');
+const createError = require('../helpers/error');
 
-exports.getAll = Model => (req, res) => {
-  Model.find(handleRequest(res));
-};
+class CRUDController {
+  constructor(Model) {
+    this.Model = Model;
+  }
 
-exports.getAllByUser = Model => (req, res) => {
-  Model.find({ userId: req.userId }, handleRequest(res));
-};
+  async get(query = {}) {
+    try {
+      return this.Model.find(query);
+    } catch ({ message }) {
+      throw createError(message);
+    }
+  }
 
-exports.getOne = Model => (req, res) => {
-  Model.find({ _id: req.params.id }, handleRequest(res));
-};
+  async create(item) {
+    try {
+      return new this.Model(item);
+    } catch ({ message }) {
+      throw createError(message);
+    }
+  }
 
-exports.create = Model => (req, res) => {
-  const created = new Model(req.body);
-  return created.save(handleRequest(res));
-};
+  async update(_id, patch) {
+    try {
+      return this.Model.findOneAndUpdate({ _id }, patch);
+    } catch ({ message }) {
+      throw createError(message);
+    }
+  }
 
-exports.update = Model => (req, res) => {
-  Model.findOneAndUpdate({ _id: req.params.id }, req.body, handleRequest(res));
-};
+  async remove(_id) {
+    try {
+      return this.Model.remove({ _id });
+    } catch ({ message }) {
+      throw createError(message);
+    }
+  }
+}
 
-exports.delete = Model => (req, res) => {
-  Model.remove({ _id: req.params.id }, handleRequest(res));
-};
+module.exports = CRUDController;
