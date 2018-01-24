@@ -1,5 +1,5 @@
 const uniqueValidator = require('mongoose-unique-validator');
-const mongoose = require('./index');
+const mongoose = require('models/db');
 const { Schema } = require('mongoose');
 
 const unitSchema = new Schema({

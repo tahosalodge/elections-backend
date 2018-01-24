@@ -1,8 +1,8 @@
-const CRUDController = require('./CRUDController');
-const AuthController = require('./AuthController');
-const createError = require('../helpers/error');
-const Notify = require('../helpers/notify');
-const UnitModel = require('../models/unit');
+const CRUDController = require('controllers/CRUDController');
+const AuthController = require('controllers/AuthController');
+const createError = require('helpers/error');
+const Notify = require('helpers/notify');
+const UnitModel = require('models/unit');
 
 class UnitController extends CRUDController {
   constructor() {

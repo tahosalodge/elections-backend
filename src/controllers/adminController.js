@@ -1,10 +1,10 @@
-const Unit = require('../models/unit');
-const User = require('../models/user');
+const Unit = require('models/unit');
+const User = require('models/user');
 const generatePassword = require('xkpasswd');
 const bcrypt = require('bcryptjs');
 const axios = require('axios');
 const { parseLocation } = require('parse-address');
-const Notify = require('../helpers/notify');
+const Notify = require('helpers/notify');
 
 class AdminController {
   static getElectionValue(unitFields, prefix, value) {

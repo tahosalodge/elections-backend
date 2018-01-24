@@ -1,4 +1,4 @@
-const mongoose = require('./index');
+const mongoose = require('models/db');
 const { Schema } = require('mongoose');
 
 const candidateSchema = new Schema({

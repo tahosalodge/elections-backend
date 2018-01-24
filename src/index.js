@@ -3,12 +3,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const Raven = require('raven');
-const candidateRoutes = require('./routes/candidates');
-const electionRoutes = require('./routes/elections');
-const nominationRoutes = require('./routes/nominations');
-const unitRoutes = require('./routes/units');
-const authRoutes = require('./routes/auth');
-const adminRoutes = require('./routes/admin');
+const candidateRoutes = require('routes/candidates');
+const electionRoutes = require('routes/elections');
+const nominationRoutes = require('routes/nominations');
+const unitRoutes = require('routes/units');
+const authRoutes = require('routes/auth');
+const adminRoutes = require('routes/admin');
 
 const app = express();
 

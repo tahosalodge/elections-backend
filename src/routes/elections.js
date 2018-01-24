@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const bodyParser = require('body-parser');
-const ElectionController = require('../controllers/ElectionController');
-const AuthController = require('../controllers/AuthController');
+const ElectionController = require('controllers/ElectionController');
+const AuthController = require('controllers/AuthController');
 
 const controller = new ElectionController();
 

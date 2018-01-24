@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const bodyParser = require('body-parser');
-const UnitController = require('../controllers/UnitController');
-const AuthController = require('../controllers/AuthController');
+const UnitController = require('controllers/UnitController');
+const AuthController = require('controllers/AuthController');
 
 const controller = new UnitController();
 
@@ -24,7 +24,6 @@ router.get('/:id', AuthController.tokenMiddleware, async (req, res) => {
     res.json(election);
   } catch (error) {
     const { code, message } = error;
-    console.log(error);
     res.status(code).json({ message });
   }
 });

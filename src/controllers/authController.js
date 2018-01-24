@@ -1,8 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Notify = require('../helpers/notify');
-const createError = require('../helpers/error');
-const User = require('../models/user');
+const Notify = require('helpers/notify');
+const createError = require('helpers/error');
+const User = require('models/user');
 
 class AuthController {
   // eslint-disable-next-line
