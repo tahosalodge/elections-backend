@@ -1,104 +1,90 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Notify = require('../helpers/notify');
+const createError = require('../helpers/error');
 const User = require('../models/user');
 
-function createToken(user) {
-  const { _id: userId, capability: userCap, unit: userUnit } = user;
-  const tokenVars = { userId, userCap };
-  if (userCap === 'unit') {
-    tokenVars.userUnit = userUnit;
+class AuthController {
+  // eslint-disable-next-line
+  createToken(user) {
+    const { _id: userId, capability: userCap, unit: userUnit } = user;
+    const tokenVars = { userId, userCap };
+    if (userCap === 'unit') {
+      tokenVars.userUnit = userUnit;
+    }
+    return jwt.sign(tokenVars, process.env.JWT_SECRET, { expiresIn: 86400 });
   }
-  return jwt.sign(tokenVars, process.env.JWT_SECRET, { expiresIn: 86400 });
-}
 
-exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  async login(email, password) {
     if (!email || !password) {
-      return res.status(400).send({ message: 'Missing parameters.' });
+      throw createError('Missing parameters.', 400);
     }
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).send({ message: 'No user found.' });
+      throw createError('No user found.', 404);
     }
     const passwordIsValid = bcrypt.compareSync(password, user.password);
     if (!passwordIsValid) {
-      return res.status(401).send({ message: 'Password incorrect.' });
+      throw createError('Password Incorrect', 401);
     }
-    const token = createToken(user);
+    const token = this.createToken(user);
     const { unit, capability } = user;
-    return res.status(200).send({ token, unit, capability });
-  } catch (e) {
-    return res.status(500).send({ message: 'Error on the server.' });
+    return { token, unit, capability };
   }
-};
 
-exports.register = async (req, res) => {
-  const {
-    lname, fname, email, password, chapter, capability,
-  } = req.body;
-  const hashedPassword = bcrypt.hashSync(password, 8);
-  const createuserData = {
-    fname,
-    lname,
-    email,
-    chapter,
-    capability,
-    password: hashedPassword,
-  };
-  try {
-    const user = await User.create(createuserData);
-    const token = createToken(user);
-    new Notify(email).sendEmail(
+  async register(userInfo) {
+    const {
+      email, fname, password, capability,
+    } = userInfo;
+    const toCreate = {
+      ...userInfo,
+      password: bcrypt.hashSync(password, 8),
+    };
+    const user = await User.create(toCreate);
+    const token = this.createToken(user);
+    await new Notify(email).sendEmail(
       'Thanks for registering with Tahosa Lodge Elections',
       `Hey ${fname}, thanks for registering with Tahosa Lodge Elections. If you have any questions or issues, please contact us at elections@tahosalodge.org.`,
     );
-
-    return res.status(200).send({ token, capability });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send(error.message);
+    return { token, capability };
   }
-};
 
-exports.me = async (req, res) => {
-  try {
-    const user = await User.findById(req.userId, { password: 0 });
-
+  static async me(userId) {
+    const user = await User.findById(userId, { password: 0 });
     if (!user) {
-      return res.status(404).send('No user found');
+      throw createError('No user found.', 404);
     }
-    return res.status(200).send(user);
-  } catch (e) {
-    return res.status(500).send('There was a problem finding the user.');
+    return user;
   }
-};
 
-exports.verifyToken = (req, res, next) => {
-  if (!req.headers.authorization) {
-    return res.status(403).send({ auth: false, message: 'No token provided.' });
-  }
-  const token = req.headers.authorization.split(' ')[1];
-  if (!token) {
-    return res.status(403).send({ auth: false, message: 'No token provided.' });
-  }
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.userId;
-    req.userCap = decoded.userCap;
-  } catch (err) {
-    return res.status(403).send({ auth: false, message: 'Failed to authenticate token.' });
-  }
-  return next();
-};
+  static async tokenMiddleware(req, res, next) {
+    if (!req.headers.authorization) {
+      throw createError('No token provided.', 403);
+    }
+    const token = req.headers.authorization.split(' ')[1];
+    if (!token) {
+      throw createError('No token provided.', 403);
+    }
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.userId = decoded.userId;
+      req.userCap = decoded.userCap;
+    } catch (err) {
+      throw createError('Failed to authenticate token.', 403);
+    }
 
-exports.updateUser = async (userId, patch) => {
-  const updatedUser = await User.findOneAndUpdate({ _id: userId }, patch);
-  return updatedUser;
-};
+    return next();
+  }
 
-exports.getUser = async (userId) => {
-  const user = await User.find({ _id: userId });
-  return user;
-};
+  static async updateUser(userId, patch) {
+    const updatedUser = await User.findOneAndUpdate({ _id: userId }, patch);
+    return updatedUser;
+  }
+
+  static async getUser(userId) {
+    const user = await User.find({ _id: userId });
+    return user;
+  }
+}
+
+module.exports = AuthController;

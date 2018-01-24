@@ -1,30 +1,62 @@
-const { Router } = require('express');
+const router = require('express').Router();
 const bodyParser = require('body-parser');
-const Unit = require('../models/unit');
-const CRUD = require('../controllers/CRUDController');
 const UnitController = require('../controllers/UnitController');
-const { verifyToken } = require('../controllers/authController');
+const AuthController = require('../controllers/AuthController');
 
-const router = Router();
+const controller = new UnitController();
+
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
-router.get('/', verifyToken, UnitController.getAll);
-
-router.get('/:id', verifyToken, CRUD.getOne(Unit));
-
-router.post('/', verifyToken, async (req, res) => {
-  const { userCap, userId, body } = req;
+router.get('/', AuthController.tokenMiddleware, async (req, res) => {
   try {
-    const unit = await UnitController.create(body, userCap, userId);
+    const units = await controller.get();
+    res.json(units);
+  } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
+
+router.get('/:id', AuthController.tokenMiddleware, async (req, res) => {
+  try {
+    const { id: _id } = req.params;
+    const election = await controller.get({ _id });
+    res.json(election);
+  } catch (error) {
+    const { code, message } = error;
+    console.log(error);
+    res.status(code).json({ message });
+  }
+});
+
+router.post('/', AuthController.tokenMiddleware, async (req, res) => {
+  const { body, userCap, userId } = req;
+  try {
+    const unit = await controller.create(body, userCap, userId);
     res.json(unit);
   } catch (e) {
     res.status(400).json(e.message);
   }
 });
 
-router.put('/:id', verifyToken, CRUD.update(Unit));
+router.put('/:id', AuthController.tokenMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const election = await controller.update(id, req.body);
+    res.json(election);
+  } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
 
-router.delete('/:id', verifyToken, CRUD.delete(Unit));
+router.delete('/:id', AuthController.tokenMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await controller.remove(id);
+    res.json({ message: 'Deleted successfully.' });
+  } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
 
 module.exports = router;

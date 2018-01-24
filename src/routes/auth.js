@@ -1,14 +1,50 @@
-const { Router } = require('express');
+const router = require('express').Router();
 const bodyParser = require('body-parser');
-const AuthController = require('../controllers/authController');
+const AuthController = require('../controllers/AuthController');
 
-const router = Router();
+const controller = new AuthController();
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
-router.post('/login', AuthController.login);
-router.post('/register', AuthController.register);
-router.get('/me', AuthController.verifyToken, AuthController.me);
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const authData = await controller.login(email, password);
+    res.json(authData);
+  } catch (error) {
+    const { code, message } = error;
+    res.status(code).json({ message });
+  }
+});
+
+router.post('/register', async (req, res) => {
+  try {
+    const {
+      email, fname, lname, chapter, password, capability,
+    } = req.body;
+    const userInfo = {
+      email,
+      fname,
+      lname,
+      chapter,
+      password,
+      capability,
+    };
+    const authInfo = await controller.register(userInfo);
+    res.json(authInfo);
+  } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
+
+router.get('/me', AuthController.tokenMiddleware, async (req, res) => {
+  try {
+    const user = await AuthController.me(req.userId);
+    res.send(user);
+  } catch ({ message }) {
+    res.status(401).json({ message });
+  }
+});
 
 module.exports = router;

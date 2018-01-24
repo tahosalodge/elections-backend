@@ -1,6 +1,7 @@
-const Mongo = require('./index');
+const mongoose = require('./index');
+const { Schema } = require('mongoose');
 
-const ElectionModel = Mongo.model('Election', {
+const electionSchema = new Schema({
   unit: {
     type: String,
     required: true,
@@ -34,4 +35,4 @@ const ElectionModel = Mongo.model('Election', {
   },
 });
 
-module.exports = ElectionModel;
+module.exports = mongoose.model('Election', electionSchema);

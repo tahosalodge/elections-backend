@@ -1,12 +1,14 @@
 const router = require('express').Router();
 const bodyParser = require('body-parser');
-const controller = require('../controllers/adminController');
-const auth = require('../controllers/authController');
+const AdminController = require('../controllers/AdminController');
+const AuthController = require('../controllers/AuthController');
+
+const controller = new AdminController();
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
-router.post('/import-unit/:oldId', auth.verifyToken, async (req, res) => {
+router.post('/import-unit/:oldId', AuthController.tokenMiddleware, async (req, res) => {
   const { oldId } = req.params;
   try {
     const unit = await controller.importUnit(oldId);

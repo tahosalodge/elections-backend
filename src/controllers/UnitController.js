@@ -1,31 +1,34 @@
-const Unit = require('../models/unit');
-const AuthController = require('./authController');
-const handleRequest = require('../helpers/handleRequest');
+const CRUDController = require('./CRUDController');
+const AuthController = require('./AuthController');
+const createError = require('../helpers/error');
 const Notify = require('../helpers/notify');
+const UnitModel = require('../models/unit');
 
-exports.getAll = async (req, res) => {
-  const { userCap } = req;
-  if (userCap === 'unit') {
-    await Unit.find({}, ['number', 'district', 'unitLeader'], handleRequest(res));
-  } else {
-    await Unit.find(handleRequest(res));
+class UnitController extends CRUDController {
+  constructor() {
+    super(UnitModel);
+    this.AuthController = new AuthController();
   }
-};
 
-exports.create = async (body, userCap, userId) => {
-  const unitParams = {
-    ...body,
-    users: [userId],
-  };
-  const unit = await Unit.create(unitParams);
-  if (userCap === 'unit') {
-    const user = await AuthController.updateUser(userId, { unit: unit._id });
-    console.log(user);
-    new Notify(user.email).sendEmail(
-      'Tahosa Lodge Elections - Unit Created',
-      `Hey ${user.fname}, your unit ${unit.number}
-      has been created. You can access it here: https://elections.tahosa.co/units/${unit._id} `,
-    );
+  async create(toCreate, userCap, userId) {
+    const unitParams = {
+      ...toCreate,
+      users: [userId],
+    };
+    try {
+      const unit = await this.Model.create(unitParams);
+      if (userCap === 'unit') {
+        const user = await this.AuthController.updateUser(userId, { unit: unit._id });
+        const message = `Hey ${user.fname}, your unit ${
+          unit.number
+        } has been created. You can access it here: https://elections.tahosa.co/units/${unit._id}.`;
+        new Notify(user.email).sendEmail('Tahosa Lodge Elections - Unit Created', message);
+      }
+      return unit;
+    } catch (e) {
+      throw createError('Error creating unit.', 500);
+    }
   }
-  return unit;
-};
+}
+
+module.exports = UnitController;
