@@ -58,22 +58,25 @@ class AuthController {
   }
 
   static async tokenMiddleware(req, res, next) {
-    if (!req.headers.authorization) {
-      throw createError('No token provided.', 403);
-    }
-    const token = req.headers.authorization.split(' ')[1];
-    if (!token) {
-      throw createError('No token provided.', 403);
-    }
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.userId = decoded.userId;
-      req.userCap = decoded.userCap;
-    } catch (err) {
-      throw createError('Failed to authenticate token.', 403);
+      if (!req.headers.authorization) {
+        throw createError('No token provided.', 403);
+      }
+      const token = req.headers.authorization.split(' ')[1];
+      if (!token) {
+        throw createError('No token provided.', 403);
+      }
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.userId = decoded.userId;
+        req.userCap = decoded.userCap;
+        return next();
+      } catch (error) {
+        throw createError('Failed to authenticate token.', 403);
+      }
+    } catch ({ code, message }) {
+      return res.status(code).send({ message });
     }
-
-    return next();
   }
 
   static async updateUser(userId, patch) {
