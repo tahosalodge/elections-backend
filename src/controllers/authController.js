@@ -88,6 +88,15 @@ class AuthController {
     const user = await User.find({ _id: userId });
     return user;
   }
+
+  static async adminMiddleware(req, res, next) {
+    const { userId } = req;
+    const { email } = await User.findOne({ _id: userId });
+    if (email.indexOf('@mckernan.in') !== -1) {
+      return next();
+    }
+    return res.status(403).send({ message: 'User not authorized for admin access' });
+  }
 }
 
 module.exports = AuthController;

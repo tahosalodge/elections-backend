@@ -5,8 +5,13 @@ const bcrypt = require('bcryptjs');
 const axios = require('axios');
 const { parseLocation } = require('parse-address');
 const Notify = require('helpers/notify');
+const createError = require('helpers/error');
 
 class AdminController {
+  constructor() {
+    this.unit = Unit;
+    this.user = User;
+  }
   static getElectionValue(unitFields, prefix, value) {
     const key = `_oa_election_${prefix}_${value}`;
     return unitFields[key];
@@ -108,7 +113,7 @@ class AdminController {
     return user;
   }
 
-  static async importUnit(oldId) {
+  async importUnit(oldId) {
     // Get data from old election site
     const { data: { cmb2: { unit_fields: unitFields } } } = await this.getOldElection(oldId);
     const address = parseLocation(this.getElectionValue(unitFields, 'unit', 'address_text'));
@@ -150,6 +155,32 @@ class AdminController {
     unit.users = [userId];
     await User.findOneAndUpdate({ _id: userId }, { unit: newUnit._id });
     return unit;
+  }
+
+  async linkUsersToUnits(dryRun) {
+    const params = {
+      capability: 'unit',
+      unit: { $exists: false },
+    };
+    try {
+      // find users without a unit
+      const users = await this.user.find(params);
+      // loop through users, and see if a unit exists
+      const updatedUsers = users.reduce(async (map, user) => {
+        const unitParams = { users: String(user._id) };
+        const unit = await this.unit.findOne(unitParams);
+        if (!unit) {
+          return map;
+        }
+        if (dryRun) {
+          return `Update to be made: { _id: ${user._id} } { unit: ${unit._id} }`;
+        }
+        return this.user.findOneAndUpdate({ _id: user._id }, { unit: unit._id });
+      }, []);
+      return updatedUsers;
+    } catch (error) {
+      throw createError(error.message);
+    }
   }
 }
 
