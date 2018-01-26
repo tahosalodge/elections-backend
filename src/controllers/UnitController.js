@@ -18,7 +18,7 @@ class UnitController extends CRUDController {
     try {
       const unit = await this.Model.create(unitParams);
       if (userCap === 'unit') {
-        const user = await this.AuthController.updateUser(userId, { unit: unit._id });
+        const user = await AuthController.updateUser(userId, { unit: unit._id });
         const message = `Hey ${user.fname}, your unit ${
           unit.number
         } has been created. You can access it here: https://elections.tahosa.co/units/${unit._id}.`;
