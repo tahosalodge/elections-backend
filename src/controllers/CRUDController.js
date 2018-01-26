@@ -13,6 +13,14 @@ class CRUDController {
     }
   }
 
+  async getById(id) {
+    try {
+      return this.Model.findById(id);
+    } catch ({ message }) {
+      throw createError(message);
+    }
+  }
+
   async create(item) {
     try {
       return new this.Model(item);

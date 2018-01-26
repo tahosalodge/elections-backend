@@ -19,8 +19,8 @@ router.get('/', AuthController.tokenMiddleware, async (req, res) => {
 
 router.get('/:id', AuthController.tokenMiddleware, async (req, res) => {
   try {
-    const { id: _id } = req.params;
-    const election = await controller.get({ _id });
+    const { id } = req.params;
+    const election = await controller.getById(id);
     res.json(election);
   } catch (error) {
     const { code, message } = error;
