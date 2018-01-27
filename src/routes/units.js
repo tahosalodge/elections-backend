@@ -10,11 +10,13 @@ router.use(bodyParser.json());
 
 router.get('/', AuthController.tokenMiddleware, async (req, res) => {
   try {
+    const { userId, userCap } = req;
     let units = [];
-    if (req.userCap === 'unit') {
+    if (userCap === 'unit') {
       units = await controller.get({}, ['number', 'district', 'unitLeader']);
     } else {
-      units = await controller.get();
+      const user = await AuthController.getUser(userId);
+      units = await controller.get({ chapter: user.chapter });
     }
     res.json(units);
   } catch ({ code, message }) {

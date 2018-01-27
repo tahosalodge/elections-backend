@@ -85,7 +85,7 @@ class AuthController {
   }
 
   static async getUser(userId) {
-    const user = await User.find({ _id: userId });
+    const user = await User.findById(userId);
     return user;
   }
 
