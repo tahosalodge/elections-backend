@@ -14,7 +14,7 @@ router.post('/import-unit/:oldId', tokenMiddleware, adminMiddleware, async (req,
     const unit = await admin.importUnit(oldId);
     res.json(unit);
   } catch ({ message, code }) {
-    res.status(code).json(message);
+    res.status(code || 500).json(message);
   }
 });
 

@@ -23,7 +23,7 @@ class AdminController {
   }
 
   static getChapter(unitFields) {
-    const chapterId = this.getElectionValue(unitFields, 'unit', 'chapter');
+    const chapterId = AdminController.getElectionValue(unitFields, 'unit', 'chapter');
     const chapters = {
       27: 'white-eagle',
       30: 'medicine-bear',
@@ -43,8 +43,8 @@ class AdminController {
       city: '',
       state: '',
       zip: '',
-      notes: this.getElectionValue(unitFields, 'unit', 'location_details'),
-      original: this.getElectionValue(unitFields, 'unit', 'address_text'),
+      notes: AdminController.getElectionValue(unitFields, 'unit', 'location_details'),
+      original: AdminController.getElectionValue(unitFields, 'unit', 'address_text'),
     };
     const parsedAddress = parseLocation(address.original);
     if (parsedAddress === null) {
@@ -75,7 +75,7 @@ class AdminController {
   }
 
   static getActiveMembers(unitFields) {
-    const attendance = this.getElectionValue(unitFields, 'unit', 'attendance');
+    const attendance = AdminController.getElectionValue(unitFields, 'unit', 'attendance');
     if (Math.abs(attendance) === 'NaN') {
       return 0;
     }
@@ -113,37 +113,39 @@ class AdminController {
     return user;
   }
 
+  // eslint-disable-next-line
   async importUnit(oldId) {
     // Get data from old election site
-    const { data: { cmb2: { unit_fields: unitFields } } } = await this.getOldElection(oldId);
-    const address = parseLocation(this.getElectionValue(unitFields, 'unit', 'address_text'));
+    const oldElection = await AdminController.getOldElection(oldId);
+    const { data: { cmb2: { unit_fields: unitFields } } } = oldElection;
+    const address = parseLocation(AdminController.getElectionValue(unitFields, 'unit', 'address_text'));
     // Parse to modify/remove anything
     const unit = {
-      number: this.getElectionValue(unitFields, 'unit', 'number'),
-      chapter: this.getChapter(unitFields),
-      activeMembers: this.getActiveMembers(unitFields),
+      number: AdminController.getElectionValue(unitFields, 'unit', 'number'),
+      chapter: AdminController.getChapter(unitFields),
+      activeMembers: AdminController.getActiveMembers(unitFields),
       address,
-      meetingLocation: this.getAddress(unitFields),
-      meetingTime: this.getElectionValue(unitFields, 'unit', 'meeting_time'),
-      announce: this.getElectionValue(unitFields, 'unit', 'callout_timing'),
+      meetingLocation: AdminController.getAddress(unitFields),
+      meetingTime: AdminController.getElectionValue(unitFields, 'unit', 'meeting_time'),
+      announce: AdminController.getElectionValue(unitFields, 'unit', 'callout_timing'),
       unitLeader: {
-        fname: this.getElectionValue(unitFields, 'leader', 'fname'),
-        lname: this.getElectionValue(unitFields, 'leader', 'lname'),
-        phone: this.getElectionValue(unitFields, 'leader', 'phone'),
-        email: this.getElectionValue(unitFields, 'leader', 'email'),
-        involvement: this.getElectionValue(unitFields, 'leader', 'involvement'),
+        fname: AdminController.getElectionValue(unitFields, 'leader', 'fname'),
+        lname: AdminController.getElectionValue(unitFields, 'leader', 'lname'),
+        phone: AdminController.getElectionValue(unitFields, 'leader', 'phone'),
+        email: AdminController.getElectionValue(unitFields, 'leader', 'email'),
+        involvement: AdminController.getElectionValue(unitFields, 'leader', 'involvement'),
       },
       adultRepresentative: {
-        fname: this.getElectionValue(unitFields, 'unit_adviser', 'fname'),
-        lname: this.getElectionValue(unitFields, 'unit_adviser', 'lname'),
-        phone: this.getElectionValue(unitFields, 'unit_adviser', 'phone'),
-        email: this.getElectionValue(unitFields, 'unit_adviser', 'email'),
+        fname: AdminController.getElectionValue(unitFields, 'unit_adviser', 'fname'),
+        lname: AdminController.getElectionValue(unitFields, 'unit_adviser', 'lname'),
+        phone: AdminController.getElectionValue(unitFields, 'unit_adviser', 'phone'),
+        email: AdminController.getElectionValue(unitFields, 'unit_adviser', 'email'),
       },
       youthRepresentative: {
-        fname: this.getElectionValue(unitFields, 'unit_representative', 'fname'),
-        lname: this.getElectionValue(unitFields, 'unit_representative', 'lname'),
-        phone: this.getElectionValue(unitFields, 'unit_representative', 'phone'),
-        email: this.getElectionValue(unitFields, 'unit_representative', 'email'),
+        fname: AdminController.getElectionValue(unitFields, 'unit_representative', 'fname'),
+        lname: AdminController.getElectionValue(unitFields, 'unit_representative', 'lname'),
+        phone: AdminController.getElectionValue(unitFields, 'unit_representative', 'phone'),
+        email: AdminController.getElectionValue(unitFields, 'unit_representative', 'email'),
       },
     };
     const existingUser = await User.findOne({ email: unit.unitLeader.email });
@@ -152,7 +154,7 @@ class AdminController {
       throw new Error('User or unit already exists');
     }
     const newUnit = await Unit.create(unit);
-    const { _id: userId } = await this.createImportUser(unit);
+    const { _id: userId } = await AdminController.createImportUser(unit);
     unit.users = [userId];
     await User.findOneAndUpdate({ _id: userId }, { unit: newUnit._id });
     return unit;
