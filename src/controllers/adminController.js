@@ -124,6 +124,7 @@ class AdminController {
       activeMembers: this.getActiveMembers(unitFields),
       address,
       meetingLocation: this.getAddress(unitFields),
+      meetingTime: this.getElectionValue(unitFields, 'unit', 'meeting_time'),
       announce: this.getElectionValue(unitFields, 'unit', 'callout_timing'),
       unitLeader: {
         fname: this.getElectionValue(unitFields, 'leader', 'fname'),
