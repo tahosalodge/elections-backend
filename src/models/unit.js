@@ -20,6 +20,10 @@ const unitSchema = new Schema({
     type: Object,
     required: true,
   },
+  meetingTime: {
+    type: Object,
+    required: true,
+  },
   unitLeader: {
     type: Object,
     required: true,
