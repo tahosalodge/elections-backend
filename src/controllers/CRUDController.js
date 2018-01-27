@@ -5,9 +5,9 @@ class CRUDController {
     this.Model = Model;
   }
 
-  async get(query = {}) {
+  async get(query = {}, projection = []) {
     try {
-      return this.Model.find(query);
+      return this.Model.find(query, projection);
     } catch ({ message }) {
       throw createError(message);
     }
