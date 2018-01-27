@@ -55,7 +55,13 @@ router.post('/', AuthController.tokenMiddleware, async (req, res) => {
 router.put('/:id', AuthController.tokenMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
+    const { userCap } = req;
     const patch = _.pick(req.body, ['unit', 'requestedDates', 'status', 'season', 'date']);
+    if (userCap === 'unit') {
+      patch.status = 'Modified by Unit';
+    } else if (userCap === 'chapter') {
+      patch.status = 'Scheduled';
+    }
     const election = await controller.update(id, patch);
     res.json(election);
   } catch ({ code, message }) {
