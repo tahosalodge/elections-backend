@@ -28,8 +28,12 @@ class AuthController {
       throw createError('Password Incorrect', 401);
     }
     const token = this.createToken(user);
-    const { unit, capability } = user;
-    return { token, unit, capability };
+    const {
+      fname, lname, capability, email: userEmail, chapter,
+    } = user;
+    return {
+      token, fname, lname, capability, email: userEmail, chapter,
+    };
   }
 
   async register(userInfo) {
