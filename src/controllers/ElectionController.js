@@ -10,11 +10,11 @@ class ElectionController extends CRUDController {
     super(ElectionModel);
   }
   async create(toCreate) {
-    const election = new this.Model(toCreate);
-    const { requestedDates, unit } = election;
-    const { number, unitLeader: { fname, email } } = await unitModel.find({ id: unit });
     try {
-      const dbItem = await this.Model.save(election);
+      const election = new this.Model(toCreate);
+      const { requestedDates, unitId } = election;
+      const { number, unitLeader: { fname, email } } = await unitModel.findById(unitId);
+      const dbItem = await election.save();
       const message = `Hi ${fname},<br />
         Please save this email for your records. Thanks for requesting an OA election for ${number}! Here are the dates you requested:<br /><br />
 

@@ -2,7 +2,7 @@ const mongoose = require('models/db');
 const { Schema } = require('mongoose');
 
 const electionSchema = new Schema({
-  unit: {
+  unitId: {
     type: String,
     required: true,
   },

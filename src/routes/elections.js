@@ -30,10 +30,10 @@ router.get('/:id', AuthController.tokenMiddleware, async (req, res) => {
 router.post('/', AuthController.tokenMiddleware, async (req, res) => {
   try {
     const {
-      unit, requestedDates, status, season,
+      unitId, requestedDates, status, season,
     } = req.body;
     const election = await controller.create({
-      unit,
+      unitId,
       requestedDates,
       status,
       season,
