@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const bodyParser = require('body-parser');
+const _ = require('lodash');
 const ElectionController = require('controllers/ElectionController');
 const AuthController = require('controllers/AuthController');
 
@@ -47,15 +48,8 @@ router.post('/', AuthController.tokenMiddleware, async (req, res) => {
 router.put('/:id', AuthController.tokenMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      unit, requestedDates, status, season,
-    } = req.body;
-    const election = await controller.update(id, {
-      unit,
-      requestedDates,
-      status,
-      season,
-    });
+    const patch = _.pick(req.body, ['unit', 'requestedDates', 'status', 'season', 'date']);
+    const election = await controller.update(id, patch);
     res.json(election);
   } catch ({ code, message }) {
     res.status(code).json({ message });

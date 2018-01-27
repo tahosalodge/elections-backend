@@ -11,12 +11,12 @@ class ElectionController extends CRUDController {
     super(ElectionModel);
   }
 
-  static async unitElectionNotification(params) {
+  static async electionCreateNotificationUnit(params) {
     const {
       fname, number, requestedDates, email,
     } = params;
     const message = `Hi ${fname},<br />
-      Please save this email for your records. Thanks for requesting an OA election for ${number}! Here are the dates you requested:<br /><br />
+      Please save this email for your records. Thanks for requesting an OA election for Troop ${number}! Here are the dates you requested:<br /><br />
 
       Date 1: ${format(requestedDates[0], 'MM/DD/YYYY')}<br />
       Date 2: ${format(requestedDates[1], 'MM/DD/YYYY')}<br />
@@ -32,7 +32,7 @@ class ElectionController extends CRUDController {
     new Notify(email).sendEmail('Election request confirmation', message);
   }
 
-  static async chapterElectionNotification(params) {
+  static async electionCreateNotificationChapter(params) {
     const {
       number, requestedDates, electionId, chapter,
     } = params;
@@ -41,7 +41,7 @@ class ElectionController extends CRUDController {
     Date 1: ${format(requestedDates[0], 'MM/DD/YYYY')}<br />
     Date 2: ${format(requestedDates[1], 'MM/DD/YYYY')}<br />
     Date 3: ${format(requestedDates[2], 'MM/DD/YYYY')}<br />
-    <a href="https://elections.tahosa.co/elections/${electionId}">Click here</a> to schedule this election, which will notify the unit. <br />
+    <a href="https://elections.tahosa.co/elections/${electionId}/edit">Click here</a> to schedule this election, which will notify the unit. <br />
     <em>If you need any technical support, or something here seems wrong, please contact Kevin McKernan.</em>`;
     users.map(user =>
       new Notify(user.email).sendEmail(
@@ -51,18 +51,22 @@ class ElectionController extends CRUDController {
   }
 
   async create(toCreate) {
+    const electionParams = {
+      ...toCreate,
+      status: 'Requested',
+    };
     try {
-      const election = new this.Model(toCreate);
+      const election = new this.Model(electionParams);
       const { requestedDates, unitId, _id: electionId } = election;
       const { number, unitLeader: { fname, email }, chapter } = await unitModel.findById(unitId);
       const dbItem = await election.save();
-      await ElectionController.unitElectionNotification({
+      await ElectionController.electionCreateNotificationUnit({
         fname,
         number,
         requestedDates,
         email,
       });
-      await ElectionController.chapterElectionNotification({
+      await ElectionController.electionCreateNotificationChapter({
         number,
         requestedDates,
         electionId,
@@ -71,6 +75,72 @@ class ElectionController extends CRUDController {
       return dbItem;
     } catch (error) {
       throw createError(error.message, 400);
+    }
+  }
+
+  static async electionUpdateNotificationUnit(params) {
+    const {
+      fname, number, email, date, electionId, meetingTime,
+    } = params;
+    const message = `Hi ${fname},<br />
+    Thanks for requesting an OA election for Troop ${number}!<br />
+    Your unit election is confirmed for ${format(date, 'MM/DD/YYYY')}.<br />
+    The OA chapter election team will arrive 15 minutes before your meeting begins at ${meetingTime}.<br />
+    A Scoutmaster or other unit leader will need to confirm the unit’s active attendance (50% required for the election) and eligible candidates on the ballot at that time.
+    <br /><br />
+    Be sure to log in and add eligible Scouts to your election here: <a href="https://elections.tahosa.co/elections/${electionId}">My Election</a>.<br />
+    We’ll remind you about this 14 days, 7 days and 2 days prior to your election.<br />
+    Really important -- your unit ballot is LOCKED 24 hours prior to your scheduled election and cannot change.<br />
+    For questions about elections procedure or website functions contact elections@tahosalodge.org.<br />
+
+    In Scouting,<br /><br />
+
+    Unit Elections Committee<br />
+    Tahosa Lodge 383`;
+    new Notify(email).sendEmail('OA Election Scheduling Notification', message);
+  }
+
+  static async electionUpdateNotificationChapter(params) {
+    const {
+      number, electionId, chapter, date,
+    } = params;
+    const users = await userModel.find({ chapter, capability: 'chapter' });
+    const formattedDate = format(date, 'MM/DD/YYYY');
+    const message = `An election has been scheduled for Troop ${number} on ${formattedDate}<br /><br />
+    <a href="https://elections.tahosa.co/elections/${electionId}">Click here</a> to see the details of this election.<br />
+    <em>If you need any technical support, or something here seems wrong, please contact Kevin McKernan.</em>`;
+    users.map(user =>
+      new Notify(user.email).sendEmail(
+        `Tahosa Elections | Election Scheduled for Troop ${number}`,
+        message,
+      ));
+  }
+
+  async update(_id, patch) {
+    try {
+      const election = await this.Model.findOneAndUpdate({ _id }, patch);
+      const { date, unitId, _id: electionId } = election;
+      const unit = await unitModel.findOneAndUpdate(unitId);
+      const {
+        number, unitLeader: { fname, email }, chapter, meetingTime,
+      } = unit;
+      await ElectionController.electionUpdateNotificationUnit({
+        fname,
+        number,
+        email,
+        date,
+        electionId,
+        meetingTime,
+      });
+      await ElectionController.electionUpdateNotificationChapter({
+        number,
+        electionId,
+        chapter,
+        date,
+      });
+      return election;
+    } catch ({ message }) {
+      throw createError(message);
     }
   }
 }
