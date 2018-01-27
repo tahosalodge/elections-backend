@@ -13,7 +13,7 @@ router.get('/', AuthController.tokenMiddleware, async (req, res) => {
     const { userId, userCap } = req;
     let units = [];
     if (userCap === 'unit') {
-      units = await controller.get({}, ['number', 'district', 'unitLeader']);
+      units = await controller.get({}, ['number', 'chapter', 'unitLeader']);
     } else {
       const user = await AuthController.getUser(userId);
       units = await controller.get({ chapter: user.chapter });

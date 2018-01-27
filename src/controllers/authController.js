@@ -91,11 +91,11 @@ class AuthController {
 
   static async adminMiddleware(req, res, next) {
     const { userId } = req;
-    const { email } = await User.findOne({ _id: userId });
-    if (email.indexOf('@mckernan.in') !== -1) {
-      return next();
+    const user = await User.findById(userId);
+    if (!user || user.email.indexOf('@mckernan.in') === -1) {
+      throw createError(400, 'User not authorized for admin access');
     }
-    return res.status(403).send({ message: 'User not authorized for admin access' });
+    return next();
   }
 }
 
