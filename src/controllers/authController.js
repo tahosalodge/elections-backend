@@ -5,8 +5,27 @@ const createError = require('helpers/error');
 const User = require('models/user');
 
 class AuthController {
-  // eslint-disable-next-line
-  createToken(user) {
+  constructor() {
+    this.user = User;
+  }
+
+  static sendUserInfo(user) {
+    const {
+      fname, lname, capability, email, chapter,
+    } = user;
+    const token = AuthController.createToken(user);
+    const userInfo = {
+      token,
+      fname,
+      lname,
+      capability,
+      email,
+      chapter,
+    };
+    return userInfo;
+  }
+
+  static createToken(user) {
     const { _id: userId, capability: userCap, unit: userUnit } = user;
     const tokenVars = { userId, userCap };
     if (userCap === 'unit') {
@@ -19,7 +38,7 @@ class AuthController {
     if (!email || !password) {
       throw createError('Missing parameters.', 400);
     }
-    const user = await User.findOne({ email });
+    const user = await this.user.findOne({ email });
     if (!user) {
       throw createError('No user found.', 404);
     }
@@ -27,38 +46,29 @@ class AuthController {
     if (!passwordIsValid) {
       throw createError('Password Incorrect', 401);
     }
-    const token = this.createToken(user);
-    const {
-      fname, lname, capability, email: userEmail, chapter,
-    } = user;
-    return {
-      token, fname, lname, capability, email: userEmail, chapter,
-    };
+    return AuthController.sendUserInfo(user);
   }
 
   async register(userInfo) {
-    const {
-      email, fname, password, capability,
-    } = userInfo;
+    const { email, fname, password } = userInfo;
     const toCreate = {
       ...userInfo,
       password: bcrypt.hashSync(password, 8),
     };
-    const user = await User.create(toCreate);
-    const token = this.createToken(user);
+    const user = await this.user.create(toCreate);
     await new Notify(email).sendEmail(
       'Thanks for registering with Tahosa Lodge Elections',
       `Hey ${fname}, thanks for registering with Tahosa Lodge Elections. If you have any questions or issues, please contact us at elections@tahosalodge.org.`,
     );
-    return { token, capability };
+    return AuthController.sendUserInfo(user);
   }
 
   static async me(userId) {
-    const user = await User.findById(userId, { password: 0 });
+    const user = await this.user.findById(userId, { password: 0 });
     if (!user) {
       throw createError('No user found.', 404);
     }
-    return user;
+    return AuthController.sendUserInfo(user);
   }
 
   static async tokenMiddleware(req, res, next) {
@@ -89,8 +99,7 @@ class AuthController {
   }
 
   static async getUser(userId) {
-    const user = await User.findById(userId);
-    return user;
+    return User.findById(userId);
   }
 
   static async adminMiddleware(req, res, next) {
