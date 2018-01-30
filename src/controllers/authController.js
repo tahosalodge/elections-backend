@@ -63,7 +63,7 @@ class AuthController {
     return AuthController.sendUserInfo(user);
   }
 
-  static async me(userId) {
+  async me(userId) {
     const user = await this.user.findById(userId, { password: 0 });
     if (!user) {
       throw createError('No user found.', 404);

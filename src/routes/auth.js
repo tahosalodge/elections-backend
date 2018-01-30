@@ -40,7 +40,7 @@ router.post('/register', async (req, res) => {
 
 router.get('/me', AuthController.tokenMiddleware, async (req, res) => {
   try {
-    const user = await AuthController.me(req.userId);
+    const user = await controller.me(req.userId);
     res.send(user);
   } catch ({ message }) {
     res.status(401).json({ message });
