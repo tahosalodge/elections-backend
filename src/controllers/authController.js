@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const generatePassword = require('xkpasswd');
 const Notify = require('helpers/notify');
 const createError = require('helpers/error');
 const User = require('models/user');
@@ -50,17 +51,21 @@ class AuthController {
   }
 
   async register(userInfo) {
-    const { email, fname, password } = userInfo;
-    const toCreate = {
-      ...userInfo,
-      password: bcrypt.hashSync(password, 8),
-    };
-    const user = await this.user.create(toCreate);
-    await new Notify(email).sendEmail(
-      'Thanks for registering with Tahosa Lodge Elections',
-      `Hey ${fname}, thanks for registering with Tahosa Lodge Elections. If you have any questions or issues, please contact us at elections@tahosalodge.org.`,
-    );
-    return AuthController.sendUserInfo(user);
+    try {
+      const { email, fname, password } = userInfo;
+      const toCreate = {
+        ...userInfo,
+        password: bcrypt.hashSync(password, 8),
+      };
+      const user = await this.user.create(toCreate);
+      await new Notify(email).sendEmail(
+        'Thanks for registering with Tahosa Lodge Elections',
+        `Hey ${fname}, thanks for registering with Tahosa Lodge Elections. If you have any questions or issues, please contact us at elections@tahosalodge.org.`,
+      );
+      return AuthController.sendUserInfo(user);
+    } catch ({ message }) {
+      throw createError(400, message);
+    }
   }
 
   async me(userId) {
@@ -109,6 +114,14 @@ class AuthController {
       throw createError(400, 'User not authorized for admin access');
     }
     return next();
+  }
+
+  static async generateUser(data) {
+    const password = generatePassword({ separators: '-' });
+    const hashedPassword = bcrypt.hashSync(password, 8);
+    const user = await User.create({ ...data, password: hashedPassword });
+    user.plainPass = password;
+    return user;
   }
 }
 

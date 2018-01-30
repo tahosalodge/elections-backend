@@ -1,11 +1,10 @@
 const Unit = require('models/unit');
 const User = require('models/user');
-const generatePassword = require('xkpasswd');
-const bcrypt = require('bcryptjs');
 const axios = require('axios');
 const { parseLocation } = require('parse-address');
 const Notify = require('helpers/notify');
 const createError = require('helpers/error');
+const Auth = require('controllers/authController');
 
 class AdminController {
   constructor() {
@@ -83,8 +82,6 @@ class AdminController {
   }
 
   static async createImportUser(unit) {
-    const password = generatePassword({ separators: '-' });
-    const hashedPassword = bcrypt.hashSync(password, 8);
     const { chapter, unitLeader, number } = unit;
     const { fname, lname, email } = unitLeader;
     const createuserData = {
@@ -93,9 +90,8 @@ class AdminController {
       email,
       chapter,
       capability: 'unit',
-      password: hashedPassword,
     };
-    const user = await User.create(createuserData);
+    const user = await Auth.generateUser(createuserData);
     new Notify(email).sendEmail(
       `Tahosa Lodge Elections - Unit Import Notification for Troop ${number}`,
       `Hey ${fname},<br />
@@ -103,7 +99,7 @@ class AdminController {
         Login at https://elections.tahosa.co with the following credentials:<br /><br />
 
         User: ${email}<br />
-        Password: ${password}<br /><br />
+        Password: ${user.plainPass}<br /><br />
 
         Please verify that your unit information was accurately imported from last year.<br />
         If you are no longer involved with this unit, please reply so we can connect with the right person.<br />
@@ -184,6 +180,27 @@ class AdminController {
     } catch (error) {
       throw createError(error.message);
     }
+  }
+
+  // eslint-disable-next-line
+  async createUser(data) {
+    const user = await Auth.generateUser(data);
+    const {
+      fname, email, plainPass, capability, chapter,
+    } = user;
+    new Notify(email).sendEmail(
+      'Tahosa Lodge Elections - Account Created',
+      `Hey ${fname},<br />
+        An account has been created for you, login at https://elections.tahosa.co/login with the following credentials:<br /><br />
+
+        User: ${email}<br />
+        Password: ${plainPass}<br />
+        Access Level: ${capability}<br />
+        Chapter: ${chapter}<br /><br />
+
+        If you have any questions or issues, please contact us at elections@tahosalodge.org.`,
+    );
+    return user;
   }
 }
 

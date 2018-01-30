@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const bodyParser = require('body-parser');
-const AuthController = require('controllers/AuthController');
+const AuthController = require('controllers/authController');
 
 const controller = new AuthController();
 
@@ -34,7 +34,7 @@ router.post('/register', async (req, res) => {
     const authInfo = await controller.register(userInfo);
     res.json(authInfo);
   } catch ({ code, message }) {
-    res.status(code).json({ message });
+    res.status(500).json({ message });
   }
 });
 

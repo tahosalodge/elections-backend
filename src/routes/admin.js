@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const bodyParser = require('body-parser');
 const AdminController = require('controllers/AdminController');
-const { tokenMiddleware, adminMiddleware } = require('controllers/AuthController');
+const { tokenMiddleware, adminMiddleware } = require('controllers/authController');
 
 const admin = new AdminController();
 
@@ -23,6 +23,24 @@ router.post('/linkUsersToUnits', tokenMiddleware, adminMiddleware, async (req, r
   try {
     const users = await admin.linkUsersToUnits(dryRun);
     res.json(users);
+  } catch ({ message, code }) {
+    res.status(500).json(message);
+  }
+});
+
+router.post('/create-user', tokenMiddleware, adminMiddleware, async (req, res) => {
+  const {
+    fname, lname, email, chapter, capability,
+  } = req.body;
+  try {
+    await admin.createUser({
+      fname,
+      lname,
+      email,
+      chapter,
+      capability,
+    });
+    res.json({ email });
   } catch ({ message, code }) {
     res.status(500).json(message);
   }
