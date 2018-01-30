@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const bodyParser = require('body-parser');
 const UnitController = require('controllers/UnitController');
-const AuthController = require('controllers/AuthController');
+const AuthController = require('controllers/authController');
 
 const controller = new UnitController();
 
@@ -14,9 +14,11 @@ router.get('/', AuthController.tokenMiddleware, async (req, res) => {
     let units = [];
     if (userCap === 'unit') {
       units = await controller.get({}, ['number', 'chapter', 'unitLeader']);
-    } else {
+    } else if (userCap === 'chapter') {
       const user = await AuthController.getUser(userId);
       units = await controller.get({ chapter: user.chapter });
+    } else {
+      units = await controller.get();
     }
     res.json(units);
   } catch ({ code, message }) {
