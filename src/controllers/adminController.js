@@ -4,7 +4,7 @@ const axios = require('axios');
 const { parseLocation } = require('parse-address');
 const Notify = require('helpers/notify');
 const createError = require('helpers/error');
-const Auth = require('controllers/authController');
+const Auth = require('controllers/AuthController');
 
 class AdminController {
   constructor() {

@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const bodyParser = require('body-parser');
 const UnitController = require('controllers/UnitController');
-const AuthController = require('controllers/authController');
+const AuthController = require('controllers/AuthController');
 
 const controller = new UnitController();
 

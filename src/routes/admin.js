@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const bodyParser = require('body-parser');
 const AdminController = require('controllers/AdminController');
-const { tokenMiddleware, adminMiddleware } = require('controllers/authController');
+const { tokenMiddleware, adminMiddleware } = require('controllers/AuthController');
 
 const admin = new AdminController();
 
