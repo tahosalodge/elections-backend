@@ -35,4 +35,6 @@ app.use('/admin', adminRoutes);
 
 app.use(Raven.errorHandler());
 
+process.on('unhandledRejection', error => Raven.captureException(error));
+
 app.listen(app.get('port'));
