@@ -12,7 +12,7 @@ class AuthController {
 
   static sendUserInfo(user) {
     const {
-      fname, lname, capability, email, chapter,
+      fname, lname, capability, email, chapter, unit,
     } = user;
     const token = AuthController.createToken(user);
     const userInfo = {
@@ -22,6 +22,7 @@ class AuthController {
       capability,
       email,
       chapter,
+      unit,
     };
     return userInfo;
   }
