@@ -1,22 +1,71 @@
-const { Router } = require('express');
+const router = require('express').Router();
 const bodyParser = require('body-parser');
-// const Nominations = require('../models/nomination');
-// const CRUD = require('../controllers/CRUDController');
+const _ = require('lodash');
+const { tokenMiddleware } = require('controllers/AuthController');
+const nominationModel = require('models/nomination');
+const CRUD = require('controllers/CRUDController');
 
-const router = Router();
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
-router.get('/', (req, res) => res.send('Coming soon'));
+const controller = new CRUD(nominationModel);
+const nominationFields = [
+  'fname',
+  'lname',
+  'dob',
+  'bsaid',
+  'rank',
+  'election',
+  'address',
+  'phone',
+  'email',
+  'campingLongTerm',
+  'campingShortTerm',
+  'chapter',
+  'status',
+  'type',
+  'position',
+];
 
-// router.get('/', CRUD.getAll(Nominations));
-//
-// router.get('/:id', CRUD.getOne(Nominations));
-//
-// router.post('/', CRUD.create(Nominations));
-//
-// router.put('/:id', CRUD.update(Nominations));
-//
-// router.delete('/:id', CRUD.delete(Nominations));
+router.get('/', tokenMiddleware, async (req, res) => {
+  try {
+    const { electionId } = req.body;
+    const nominations = await controller.get({ electionId });
+    res.json(nominations);
+  } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
+
+router.post('/', tokenMiddleware, async (req, res) => {
+  try {
+    const toCreate = _.pick(req.body, nominationFields);
+    const nomination = await controller.create(toCreate);
+    res.json(nomination);
+  } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
+
+router.put('/:id', tokenMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patch = _.pick(req.body, nominationFields);
+    const nomination = await controller.update(id, patch);
+    res.json(nomination);
+  } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
+
+router.delete('/:id', tokenMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await controller.remove(id);
+    res.json({ message: 'Deleted successfully.' });
+  } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
 
 module.exports = router;

@@ -22,7 +22,11 @@ const candidateSchema = new Schema({
     type: String,
     required: true,
   },
-  election: {
+  electionId: {
+    type: String,
+    required: true,
+  },
+  unitId: {
     type: String,
     required: true,
   },
@@ -40,11 +44,9 @@ const candidateSchema = new Schema({
   },
   youthPhone: {
     type: String,
-    required: true,
   },
-  YouthEmail: {
+  youthEmail: {
     type: String,
-    required: true,
   },
   campingLongTerm: {
     type: String,
@@ -61,20 +63,6 @@ const candidateSchema = new Schema({
   status: {
     type: String,
     required: true,
-  },
-  createdAt: {
-    type: Date,
-    required: true,
-  },
-  createdBy: {
-    type: String,
-    required: true,
-  },
-  updatedAt: {
-    type: Date,
-  },
-  updatedBy: {
-    type: String,
   },
   notified: {
     type: Date,
