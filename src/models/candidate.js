@@ -15,7 +15,7 @@ const candidateSchema = new Schema({
     required: true,
   },
   bsaid: {
-    type: Number,
+    type: String,
     required: true,
   },
   rank: {
