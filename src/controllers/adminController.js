@@ -207,7 +207,7 @@ class AdminController {
 
   async linkElectionToChapter(dryRun) {
     try {
-      const elections = await this.election.find({}, []).lean();
+      const elections = await this.election.find({ chapter: { $exists: false } }, []).lean();
       const updatedElections = elections.map(async ({ _id, unitId }) => {
         const unit = await this.unit.findById(unitId).lean();
         if (!unit) {

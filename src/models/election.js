@@ -33,6 +33,9 @@ const electionSchema = new Schema({
   election2Ballots: {
     type: Number,
   },
+  chapter: {
+    type: String,
+  },
 });
 
 module.exports = mongoose.model('Election', electionSchema);
