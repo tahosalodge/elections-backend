@@ -1,5 +1,6 @@
 const Unit = require('models/unit');
 const User = require('models/user');
+const Election = require('models/election');
 const axios = require('axios');
 const { parseLocation } = require('parse-address');
 const Notify = require('helpers/notify');
@@ -10,6 +11,7 @@ class AdminController {
   constructor() {
     this.unit = Unit;
     this.user = User;
+    this.election = Election;
   }
   static getElectionValue(unitFields, prefix, value) {
     const key = `_oa_election_${prefix}_${value}`;
@@ -201,6 +203,26 @@ class AdminController {
         If you have any questions or issues, please contact us at elections@tahosalodge.org.`,
     );
     return user;
+  }
+
+  async linkElectionToChapter(dryRun) {
+    try {
+      const elections = await this.election.find({}, []).lean();
+      const updatedElections = elections.map(async ({ _id, unitId }) => {
+        const unit = await this.unit.findById(unitId).lean();
+        if (!unit) {
+          return `No unit for ${_id}`;
+        }
+        if (!dryRun) {
+          await this.election.findOneAndUpdate({ _id }, { chapter: unit.chapter });
+        }
+        return `Update election ${_id} to have chapter ${unit.chapter}.`;
+      });
+      const results = await Promise.all(updatedElections);
+      return results;
+    } catch (error) {
+      throw createError(error.message);
+    }
   }
 }
 

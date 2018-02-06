@@ -28,6 +28,16 @@ router.post('/linkUsersToUnits', tokenMiddleware, adminMiddleware, async (req, r
   }
 });
 
+router.post('/linkElectionToChapter', tokenMiddleware, adminMiddleware, async (req, res) => {
+  const { dryRun } = req.body;
+  try {
+    const elections = await admin.linkElectionToChapter(dryRun);
+    res.json(elections);
+  } catch ({ message, code }) {
+    res.status(500).json(message);
+  }
+});
+
 router.post('/create-user', tokenMiddleware, adminMiddleware, async (req, res) => {
   const {
     fname, lname, email, chapter, capability,
