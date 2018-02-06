@@ -23,7 +23,9 @@ class CRUDController {
 
   async create(item) {
     try {
-      return new this.Model(item);
+      const created = new this.Model(item);
+      await created.save();
+      return created;
     } catch ({ message }) {
       throw createError(message);
     }

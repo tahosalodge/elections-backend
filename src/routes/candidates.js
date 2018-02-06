@@ -15,7 +15,7 @@ const candidateFields = [
   'dob',
   'bsaid',
   'rank',
-  'election',
+  'electionId',
   'address',
   'parentPhone',
   'parentEmail',
@@ -25,12 +25,23 @@ const candidateFields = [
   'campingShortTerm',
   'chapter',
   'status',
+  'unitId',
 ];
 
 router.get('/', tokenMiddleware, async (req, res) => {
   try {
-    const { electionId } = req.body;
+    const { electionId } = req.query;
     const candidates = await controller.get({ electionId });
+    res.json(candidates);
+  } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
+
+router.get('/:candidateId', tokenMiddleware, async (req, res) => {
+  try {
+    const { candidateId } = req.params;
+    const candidates = await controller.getById(candidateId);
     res.json(candidates);
   } catch ({ code, message }) {
     res.status(code).json({ message });

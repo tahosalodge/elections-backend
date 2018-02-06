@@ -22,7 +22,11 @@ const candidateSchema = new Schema({
     type: String,
     required: true,
   },
-  election: {
+  electionId: {
+    type: String,
+    required: true,
+  },
+  unitId: {
     type: String,
     required: true,
   },
