@@ -1,0 +1,14 @@
+pipeline:
+  docker-build:
+    image: plugins/docker
+    repo: mckernanin/elections-api
+    secrets: [ docker_username, docker_password ]
+    pull: true
+    tags:
+      - latest
+      - ${DRONE_COMMIT}
+  slack:
+    image: plugins/slack
+    webhook: ${SLACK_URL}
+    channel: deployments
+branches: master
