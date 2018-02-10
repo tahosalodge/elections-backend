@@ -1,4 +1,5 @@
 FROM node:8-alpine
+ENV NODE_PATH src/
 
 RUN mkdir -p /usr/src/app
 WORKDIR /app
