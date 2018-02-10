@@ -1,5 +1,5 @@
 pipeline:
-  start-notification:
+  notify-start:
     image: plugins/slack
     secrets: [ slack_webhook ]
     channel: deployments
@@ -24,7 +24,7 @@ pipeline:
     service: elections/elections-api
     docker_image: mckernanin/elections-api
 
-  success-notify:
+  notify-finish:
     image: plugins/slack
     secrets: [ slack_webhook ]
     channel: deployments
