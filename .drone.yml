@@ -1,14 +1,33 @@
 pipeline:
-  docker-build:
+  start-notification:
+    image: plugins/slack
+    secrets: [ slack_webhook ]
+    channel: deployments
+    username: drone
+    template: "<{{build.link}}|Deployment #{{build.number}} started> on <http://github.com/{{repo.owner}}/{{repo.name}}/tree/{{build.branch}}|{{repo.name}}:{{build.branch}}> by {{build.author}}"
+
+  build:
     image: plugins/docker
     repo: mckernanin/elections-api
     secrets: [ docker_username, docker_password ]
-    pull: true
+    use_cache: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     tags:
       - latest
       - ${DRONE_COMMIT}
-  slack:
+  deploy-to-rancher:
+    image: peloton/drone-rancher
+    url: https://rancher.mckernan.in
+    secrets: [ rancher_access_key, rancher_secret_key ]
+    service: elections/elections-api
+    docker_image: mckernanin/elections-api
+  success-notify:
     image: plugins/slack
-    webhook: ${SLACK_URL}
+    secrets: [ slack_webhook ]
     channel: deployments
+    username: drone
+    when:
+      branch: [ master ]
+      status: [ success, failure ]
 branches: master
