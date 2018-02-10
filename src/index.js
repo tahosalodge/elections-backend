@@ -25,13 +25,13 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors());
-app.get('/', (req, res) => res.send('Hello world!'));
-app.use('/candidates', candidateRoutes);
-app.use('/elections', electionRoutes);
-app.use('/nominations', nominationRoutes);
-app.use('/units', unitRoutes);
-app.use('/auth', authRoutes);
-app.use('/admin', adminRoutes);
+app.get('/api', (req, res) => res.json({ message: 'Hello world!' }));
+app.use('/api/candidates', candidateRoutes);
+app.use('/api/elections', electionRoutes);
+app.use('/api/nominations', nominationRoutes);
+app.use('/api/units', unitRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use(Raven.errorHandler());
 
