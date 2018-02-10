@@ -16,12 +16,14 @@ pipeline:
     tags:
       - latest
       - ${DRONE_COMMIT}
-  # deploy-to-rancher:
-  #   image: peloton/drone-rancher
-  #   url: https://rancher.mckernan.in
-  #   secrets: [ rancher_access_key, rancher_secret_key ]
-  #   service: elections/elections-api
-  #   docker_image: mckernanin/elections-api
+
+  deploy-to-rancher:
+    image: peloton/drone-rancher
+    url: https://rancher.mckernan.in
+    secrets: [ rancher_access_key, rancher_secret_key ]
+    service: elections/elections-api
+    docker_image: mckernanin/elections-api
+
   success-notify:
     image: plugins/slack
     secrets: [ slack_webhook ]
@@ -30,4 +32,5 @@ pipeline:
     when:
       branch: [ master ]
       status: [ success, failure ]
+
 branches: master
