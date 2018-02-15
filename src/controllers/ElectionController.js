@@ -5,6 +5,7 @@ const createError = require('helpers/error');
 const Notify = require('helpers/notify');
 const CRUDController = require('controllers/CRUDController');
 const ElectionModel = require('models/election');
+const CandidateModel = require('models/candidate');
 
 class ElectionController extends CRUDController {
   constructor() {
@@ -141,6 +142,33 @@ class ElectionController extends CRUDController {
       return election;
     } catch ({ message }) {
       throw createError(message);
+    }
+  }
+
+  async report(_id, patch) {
+    try {
+      const { candidates: toElect, ...electionPatch } = patch;
+      const election = await this.Model.findOneAndUpdate({ _id }, electionPatch);
+      const candidates = await Promise.all(Object.keys(toElect).map(async (candidateId) => {
+        let candidate;
+        if (toElect[candidateId]) {
+          candidate = await CandidateModel.findOneAndUpdate(
+            { _id: candidateId },
+            { status: 'Elected' },
+            { new: true },
+          );
+        } else {
+          candidate = await CandidateModel.findOneAndUpdate(
+            { _id: candidateId },
+            { status: 'Not Elected' },
+            { new: true },
+          );
+        }
+        return candidate.toJSON();
+      }));
+      return { election: election.toJSON(), candidates };
+    } catch (error) {
+      throw createError(error.message);
     }
   }
 }

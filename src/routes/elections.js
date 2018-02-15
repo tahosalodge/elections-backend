@@ -2,19 +2,19 @@ const router = require('express').Router();
 const bodyParser = require('body-parser');
 const _ = require('lodash');
 const ElectionController = require('controllers/ElectionController');
-const AuthController = require('controllers/AuthController');
+const { tokenMiddleware, getUser } = require('controllers/AuthController');
 
 const controller = new ElectionController();
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
-router.get('/', AuthController.tokenMiddleware, async (req, res) => {
+router.get('/', tokenMiddleware, async (req, res) => {
   try {
     const { userId, userCap } = req;
     let elections = [];
     if (userCap === 'unit') {
-      const { unit: unitId } = await AuthController.getUser(userId);
+      const { unit: unitId } = await getUser(userId);
       elections = await controller.get({ unitId });
     } else {
       elections = await controller.get();
@@ -25,7 +25,7 @@ router.get('/', AuthController.tokenMiddleware, async (req, res) => {
   }
 });
 
-router.get('/:id', AuthController.tokenMiddleware, async (req, res) => {
+router.get('/:id', tokenMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const election = await controller.getById(id);
@@ -35,7 +35,7 @@ router.get('/:id', AuthController.tokenMiddleware, async (req, res) => {
   }
 });
 
-router.post('/', AuthController.tokenMiddleware, async (req, res) => {
+router.post('/', tokenMiddleware, async (req, res) => {
   try {
     const {
       unitId, requestedDates, status, season,
@@ -52,7 +52,7 @@ router.post('/', AuthController.tokenMiddleware, async (req, res) => {
   }
 });
 
-router.put('/:id', AuthController.tokenMiddleware, async (req, res) => {
+router.put('/:id', tokenMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { userCap } = req;
@@ -69,7 +69,24 @@ router.put('/:id', AuthController.tokenMiddleware, async (req, res) => {
   }
 });
 
-router.delete('/:id', AuthController.tokenMiddleware, async (req, res) => {
+router.put('/:id/report', tokenMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patch = _.pick(req.body, [
+      'candidates',
+      'youthAttendance',
+      'election1Ballots',
+      'election2Ballots',
+      'status',
+    ]);
+    const { election, candidates } = await controller.report(id, patch);
+    res.json({ election, candidates });
+  } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
+
+router.delete('/:id', tokenMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     await controller.remove(id);

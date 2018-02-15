@@ -3,6 +3,7 @@ module.exports = {
   rules: {
     'no-underscore-dangle': 0,
     'no-unused-vars': ['error', { ignoreRestSiblings: true }],
+    'class-methods-use-this': 0,
   },
   settings: {
     'import/resolver': {
