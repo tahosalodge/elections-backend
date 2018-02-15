@@ -32,6 +32,11 @@ class Notify {
     mailer
       .sendMail(options)
       .then(info => console.log(info))
+      .then(() => {
+        if (NODE_ENV === 'development') {
+          console.table(options);
+        }
+      })
       .catch(error => console.log(error));
   }
 }

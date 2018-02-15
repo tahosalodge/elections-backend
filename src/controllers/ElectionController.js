@@ -145,10 +145,35 @@ class ElectionController extends CRUDController {
     }
   }
 
+  async electionReportNotification({
+    number, chapter, email, electionId, electedCount,
+  }) {
+    const users = await userModel.find({ chapter, capability: 'chapter' });
+    const message = `
+    The election results have been entered for Troop ${number}.<br /><br />
+
+    ${electedCount} candidates were elected.<br />
+
+    <a href="https://elections.tahosa.co/elections/${electionId}">Click here</a> to see the details of this election.<br />
+    `;
+    new Notify(email).sendEmail(`Tahosa Elections | Results Entered for Troop ${number}`, message);
+    users.map(({ email: userEmail }) =>
+      new Notify(userEmail).sendEmail(
+        `Tahosa Elections | Results Entered for Troop ${number}`,
+        message,
+      ));
+  }
+
   async report(_id, patch) {
     try {
       const { candidates: toElect, ...electionPatch } = patch;
+
       const election = await this.Model.findOneAndUpdate({ _id }, electionPatch);
+
+      const unit = await unitModel.findOneAndUpdate(election.unitId);
+      const { number, unitLeader: { email }, chapter } = unit;
+
+      let electedCount = 0;
       const candidates = await Promise.all(Object.keys(toElect).map(async (candidateId) => {
         let candidate;
         if (toElect[candidateId]) {
@@ -157,6 +182,7 @@ class ElectionController extends CRUDController {
             { status: 'Elected' },
             { new: true },
           );
+          electedCount += 1;
         } else {
           candidate = await CandidateModel.findOneAndUpdate(
             { _id: candidateId },
@@ -166,6 +192,16 @@ class ElectionController extends CRUDController {
         }
         return candidate.toJSON();
       }));
+
+      // Send emails
+      await this.electionReportNotification({
+        number,
+        chapter,
+        email,
+        electedCount,
+        electionId: _id,
+      });
+
       return { election: election.toJSON(), candidates };
     } catch (error) {
       throw createError(error.message);
