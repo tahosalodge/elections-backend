@@ -47,4 +47,14 @@ router.get('/me', AuthController.tokenMiddleware, async (req, res) => {
   }
 });
 
+router.post('/resetPassword', async (req, res) => {
+  try {
+    const { email } = req.body;
+    await controller.resetPassword(email);
+    res.send(`Password reset successfully, a new password has been emailed to you at ${email}`);
+  } catch ({ message }) {
+    res.status(401).json({ message });
+  }
+});
+
 module.exports = router;

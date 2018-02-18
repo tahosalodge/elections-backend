@@ -124,6 +124,16 @@ class AuthController {
     user.plainPass = password;
     return user;
   }
+
+  async resetPassword(email) {
+    const plainPassword = generatePassword({ separators: '-' });
+    const password = bcrypt.hashSync(plainPassword, 8);
+    await User.findOneAndUpdate({ email }, { password });
+    await new Notify(email).sendEmail(
+      'Tahosa Elections | Password Reset Notification',
+      `Your new password is: ${plainPassword}`,
+    );
+  }
 }
 
 module.exports = AuthController;
