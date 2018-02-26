@@ -56,4 +56,15 @@ router.post('/create-user', tokenMiddleware, adminMiddleware, async (req, res) =
   }
 });
 
+router.post('/candidate-import', tokenMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { candidateCsv } = req.files;
+    const { electionId, chapter, unitId } = req.body;
+    const candidates = await admin.candidateImport(candidateCsv, electionId, chapter, unitId);
+    res.json({ message: `Imported ${candidates.length} candidates.` });
+  } catch ({ message, code }) {
+    res.status(500).json(message);
+  }
+});
+
 module.exports = router;

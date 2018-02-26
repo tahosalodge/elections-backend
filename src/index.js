@@ -3,6 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const Raven = require('raven');
+const fileUpload = require('express-fileupload');
+
 const candidateRoutes = require('routes/candidates');
 const electionRoutes = require('routes/elections');
 const nominationRoutes = require('routes/nominations');
@@ -19,6 +21,7 @@ app.set('router', express.Router);
 app.use(Raven.requestHandler());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(fileUpload());
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');

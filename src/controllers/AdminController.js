@@ -1,8 +1,11 @@
 const Unit = require('models/unit');
 const User = require('models/user');
 const Election = require('models/election');
+const Candidate = require('models/candidate');
+const CRUD = require('controllers/CRUDController');
 const axios = require('axios');
 const { parseLocation } = require('parse-address');
+const csv = require('neat-csv');
 const Notify = require('helpers/notify');
 const createError = require('helpers/error');
 const Auth = require('controllers/AuthController');
@@ -12,6 +15,7 @@ class AdminController {
     this.unit = Unit;
     this.user = User;
     this.election = Election;
+    this.candidateController = new CRUD(Candidate);
   }
   static getElectionValue(unitFields, prefix, value) {
     const key = `_oa_election_${prefix}_${value}`;
@@ -223,6 +227,42 @@ class AdminController {
     } catch (error) {
       throw createError(error.message);
     }
+  }
+
+  async candidateImport(file, electionId, chapter, unitId) {
+    const status = 'Eligible';
+    const parsed = await csv(file.data.toString());
+    const candidates = parsed.filter(row => row.bsaid !== '').map((row) => {
+      const candidate = {
+        address: {},
+        electionId,
+        chapter,
+        status,
+        unitId,
+        imported: true,
+      };
+      Object.keys(row).forEach((key) => {
+        if (key.indexOf('address.') !== -1) {
+          const addressKey = key.split('.')[1];
+          candidate.address[addressKey] = row[key];
+          return;
+        }
+        if (key === 'youthEmail' && row.youthEmail === row.parentEmail) {
+          return;
+        }
+        if (key === 'youthPhone' && row.youthPhone === row.parentPhone) {
+          return;
+        }
+        if (row[key] === '') {
+          return;
+        }
+        candidate[key] = row[key];
+      });
+      return candidate;
+    });
+
+    await candidates.forEach(async candidate => this.candidateController.create(candidate));
+    return candidates;
   }
 }
 

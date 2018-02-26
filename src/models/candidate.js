@@ -67,6 +67,9 @@ const candidateSchema = new Schema({
   notified: {
     type: Date,
   },
+  imported: {
+    type: Boolean,
+  },
 });
 
 module.exports = mongoose.model('Candidate', candidateSchema);
