@@ -33,8 +33,11 @@ app.use('/api/units', unitRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 
-app.use(Raven.errorHandler());
-
-process.on('unhandledRejection', error => Raven.captureException(error));
+if (process.env.NODE_ENV === 'production') {
+  app.use(Raven.errorHandler());
+  process.on('unhandledRejection', error => Raven.captureException(error));
+} else {
+  process.on('unhandledRejection', error => console.error(error));
+}
 
 app.listen(app.get('port'));
