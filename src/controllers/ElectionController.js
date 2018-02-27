@@ -110,21 +110,28 @@ class ElectionController extends CRUDController {
     const message = `An election has been scheduled for Troop ${number} on ${formattedDate}<br /><br />
     <a href="https://elections.tahosa.co/elections/${electionId}">Click here</a> to see the details of this election.<br />
     <em>If you need any technical support, or something here seems wrong, please contact Kevin McKernan.</em>`;
-    users.map(user =>
-      new Notify(user.email).sendEmail(
+    if (users && users.length > 0) {
+      users.map(user =>
+        new Notify(user.email).sendEmail(
+          `Tahosa Elections | Election Scheduled for Troop ${number}`,
+          message,
+        ));
+    } else {
+      new Notify('kevin@mckernan.in').sendEmail(
         `Tahosa Elections | Election Scheduled for Troop ${number}`,
-        message,
-      ));
+        `No chapter users found to send the following message to:<hr /><br />${message}`,
+      );
+    }
   }
 
-  async update(_id, patch) {
+  async update(electionId, patch) {
     try {
-      const election = await this.Model.findOneAndUpdate({ _id }, patch);
-      const { date, unitId, _id: electionId } = election;
-      const unit = await unitModel.findOneAndUpdate(unitId);
+      const election = await this.Model.findOneAndUpdate({ _id: electionId }, patch);
+      const { date, unitId } = election.toJSON();
+      const unit = await unitModel.findById(unitId);
       const {
         number, unitLeader: { fname, email }, chapter, meetingTime,
-      } = unit;
+      } = unit.toJSON();
       await ElectionController.electionUpdateNotificationUnit({
         fname,
         number,
