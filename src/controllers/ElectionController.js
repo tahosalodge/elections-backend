@@ -6,6 +6,7 @@ const Notify = require('helpers/notify');
 const CRUDController = require('controllers/CRUDController');
 const ElectionModel = require('models/election');
 const CandidateModel = require('models/candidate');
+const uniqueElectionDate = require('helpers/uniqueDate');
 
 class ElectionController extends CRUDController {
   constructor() {
@@ -57,8 +58,15 @@ class ElectionController extends CRUDController {
       status: 'Requested',
     };
     try {
+      uniqueElectionDate(electionParams.requestedDates);
       const election = new this.Model(electionParams);
-      const { requestedDates, unitId, _id: electionId } = election;
+      const {
+        requestedDates, unitId, _id: electionId, season,
+      } = election;
+      const existing = await this.get({ season, unitId });
+      if (existing) {
+        throw createError('Election already exists for this unit.', 400);
+      }
       const { number, unitLeader: { fname, email }, chapter } = await unitModel.findById(unitId);
       const dbItem = await election.save();
       await ElectionController.electionCreateNotificationUnit({
