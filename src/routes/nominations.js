@@ -37,6 +37,16 @@ router.get('/', tokenMiddleware, async (req, res) => {
   }
 });
 
+router.get('/:nominationId', tokenMiddleware, async (req, res) => {
+  try {
+    const { nominationId } = req.params;
+    const nominations = await controller.getById(nominationId);
+    res.json(nominations);
+  } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
+
 router.post('/', tokenMiddleware, async (req, res) => {
   try {
     const toCreate = _.pick(req.body, nominationFields);

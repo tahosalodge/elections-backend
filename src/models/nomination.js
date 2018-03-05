@@ -15,10 +15,10 @@ const nominationSchema = new Schema({
     required: true,
   },
   bsaid: {
-    type: Number,
+    type: String,
     required: true,
   },
-  election: {
+  electionId: {
     type: String,
     required: true,
   },
