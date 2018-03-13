@@ -21,12 +21,11 @@ pipeline:
     secrets: [ rancher_access_key, rancher_secret_key ]
     service: elections/elections-api
     docker_image: mckernanin/elections-api
+    confirm: true
 
   notify-finish:
     image: plugins/slack
     secrets: [ slack_webhook ]
-    channel: deployments
-    username: drone
     when:
       branch: [ master ]
       status: [ success, failure ]
