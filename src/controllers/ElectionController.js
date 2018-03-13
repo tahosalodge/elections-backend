@@ -64,7 +64,7 @@ class ElectionController extends CRUDController {
         requestedDates, unitId, _id: electionId, season,
       } = election;
       const existing = await this.get({ season, unitId });
-      if (existing) {
+      if (existing.length > 0) {
         throw createError('Election already exists for this unit.', 400);
       }
       const { number, unitLeader: { fname, email }, chapter } = await unitModel.findById(unitId);

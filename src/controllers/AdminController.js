@@ -23,7 +23,7 @@ class AdminController {
   }
 
   static async getOldElection(id) {
-    const apiUrl = 'https://elections.tahosalodge.org/wp-json/wp/v2/oae_election';
+    const apiUrl = process.env.IMPORT_URL;
     return axios(`${apiUrl}/${id}`);
   }
 
@@ -125,7 +125,7 @@ class AdminController {
     const unit = {
       number: AdminController.getElectionValue(unitFields, 'unit', 'number'),
       chapter: AdminController.getChapter(unitFields),
-      activeMembers: AdminController.getActiveMembers(unitFields),
+      activeMembers: AdminController.getActiveMembers(unitFields) || 0,
       address,
       meetingLocation: AdminController.getAddress(unitFields),
       meetingTime: AdminController.getElectionValue(unitFields, 'unit', 'meeting_time'),
@@ -152,8 +152,11 @@ class AdminController {
     };
     const existingUser = await User.findOne({ email: unit.unitLeader.email });
     const existingUnit = await Unit.findOne({ number: unit.number });
-    if (existingUser !== null || existingUnit !== null) {
-      throw new Error('User or unit already exists');
+    if (existingUser !== null) {
+      throw new Error(`User ${unit.unitLeader.email} already exists`);
+    }
+    if (existingUnit !== null) {
+      throw new Error(`Unit #${unit.number} already exists.`);
     }
     const newUnit = await Unit.create(unit);
     const { _id: userId } = await AdminController.createImportUser(unit);

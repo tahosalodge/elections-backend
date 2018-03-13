@@ -59,7 +59,7 @@ router.put('/:id', tokenMiddleware, async (req, res) => {
     const patch = _.pick(req.body, ['unit', 'requestedDates', 'status', 'season', 'date']);
     if (userCap === 'unit') {
       patch.status = 'Modified by Unit';
-    } else if (userCap === 'chapter') {
+    } else {
       patch.status = 'Scheduled';
     }
     const election = await controller.update(id, patch);
