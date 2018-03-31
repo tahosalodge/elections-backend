@@ -28,8 +28,11 @@
   "devDependencies": {
     "eslint": "^4.9.0",
     "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-import": "^2.8.0",
-    "nodemon": "^1.12.1"
+    "nodemon": "^1.12.1",
+    "prettier": "^1.11.1",
+    "prettier-eslint": "^8.8.1"
   },
   "scripts": {
     "prod": "NODE_PATH=src/ node src/index.js",
@@ -42,7 +45,12 @@
     "test:coverage": "jest --coverage"
   },
   "jest": {
-    "moduleDirectories": ["<rootDir>/src", "node_modules"],
-    "collectCoverageFrom": ["src/**/*.js"]
+    "moduleDirectories": [
+      "<rootDir>/src",
+      "node_modules"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ]
   }
 }
