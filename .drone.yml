@@ -2,8 +2,6 @@ pipeline:
   notify-start:
     image: plugins/slack
     secrets: [ slack_webhook ]
-    channel: deployments
-    username: drone
     template: "<{{build.link}}|Deployment #{{build.number}} started> on <http://github.com/{{repo.owner}}/{{repo.name}}/tree/{{build.branch}}|{{repo.name}}:{{build.branch}}> by {{build.author}}"
 
   build:
@@ -23,12 +21,11 @@ pipeline:
     secrets: [ rancher_access_key, rancher_secret_key ]
     service: elections/elections-api
     docker_image: mckernanin/elections-api
+    confirm: true
 
   notify-finish:
     image: plugins/slack
     secrets: [ slack_webhook ]
-    channel: deployments
-    username: drone
     when:
       branch: [ master ]
       status: [ success, failure ]
