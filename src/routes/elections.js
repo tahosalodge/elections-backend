@@ -37,15 +37,14 @@ router.get('/:id', tokenMiddleware, async (req, res) => {
 
 router.post('/', tokenMiddleware, async (req, res) => {
   try {
-    const {
-      unitId, requestedDates, status, season,
-    } = req.body;
-    const election = await controller.create({
-      unitId,
-      requestedDates,
-      status,
-      season,
-    });
+    const data = _.pick(req.body, [
+      'unitId',
+      'requestedDates',
+      'status',
+      'season',
+      'chapter',
+    ]);
+    const election = await controller.create(data);
     res.json(election);
   } catch ({ code, message }) {
     res.status(code).json({ message });
@@ -56,7 +55,13 @@ router.put('/:id', tokenMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { userCap } = req;
-    const patch = _.pick(req.body, ['unit', 'requestedDates', 'status', 'season', 'date']);
+    const patch = _.pick(req.body, [
+      'unit',
+      'requestedDates',
+      'status',
+      'season',
+      'date',
+    ]);
     if (userCap === 'unit') {
       patch.status = 'Modified by Unit';
     } else {
