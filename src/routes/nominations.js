@@ -15,7 +15,7 @@ const nominationFields = [
   'dob',
   'bsaid',
   'rank',
-  'election',
+  'electionId',
   'address',
   'phone',
   'email',
