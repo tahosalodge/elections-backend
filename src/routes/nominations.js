@@ -15,7 +15,7 @@ const nominationFields = [
   'dob',
   'bsaid',
   'rank',
-  'election',
+  'electionId',
   'address',
   'phone',
   'email',
@@ -29,8 +29,18 @@ const nominationFields = [
 
 router.get('/', tokenMiddleware, async (req, res) => {
   try {
-    const { electionId } = req.body;
+    const { electionId } = req.query;
     const nominations = await controller.get({ electionId });
+    res.json(nominations);
+  } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
+
+router.get('/:nominationId', tokenMiddleware, async (req, res) => {
+  try {
+    const { nominationId } = req.params;
+    const nominations = await controller.getById(nominationId);
     res.json(nominations);
   } catch ({ code, message }) {
     res.status(code).json({ message });
