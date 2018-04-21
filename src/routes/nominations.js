@@ -30,7 +30,12 @@ const nominationFields = [
 router.get('/', tokenMiddleware, async (req, res) => {
   try {
     const { electionId } = req.query;
-    const nominations = await controller.get({ electionId });
+    let nominations = [];
+    if (electionId) {
+      nominations = await controller.get({ electionId });
+    } else {
+      nominations = await controller.get();
+    }
     res.json(nominations);
   } catch ({ code, message }) {
     res.status(code).json({ message });

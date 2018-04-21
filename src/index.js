@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const Raven = require('raven');
 const fileUpload = require('express-fileupload');
+const morgan = require('morgan');
 
 const candidateRoutes = require('routes/candidates');
 const electionRoutes = require('routes/elections');
@@ -17,6 +18,7 @@ const app = express();
 Raven.config(process.env.SENTRY_DSN).install();
 app.set('port', process.env.PORT || 4001);
 app.set('router', express.Router);
+app.use(morgan('dev'));
 
 app.use(Raven.requestHandler());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -24,7 +26,10 @@ app.use(bodyParser.json());
 app.use(fileUpload());
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
   next();
 });
 app.use(cors());
