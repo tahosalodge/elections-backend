@@ -11,9 +11,7 @@ class AuthController {
   }
 
   static sendUserInfo(user) {
-    const {
-      fname, lname, capability, email, chapter, unit,
-    } = user;
+    const { fname, lname, capability, email, chapter, unit } = user;
     const token = AuthController.createToken(user);
     const userInfo = {
       token,
@@ -61,7 +59,7 @@ class AuthController {
       const user = await this.user.create(toCreate);
       await new Notify(email).sendEmail(
         'Thanks for registering with Tahosa Lodge Elections',
-        `Hey ${fname}, thanks for registering with Tahosa Lodge Elections. If you have any questions or issues, please contact us at elections@tahosalodge.org.`,
+        `Hey ${fname}, thanks for registering with Tahosa Lodge Elections. If you have any questions or issues, please contact us at elections@tahosalodge.org.`
       );
       return AuthController.sendUserInfo(user);
     } catch ({ message }) {
@@ -131,8 +129,13 @@ class AuthController {
     await User.findOneAndUpdate({ email }, { password });
     await new Notify(email).sendEmail(
       'Tahosa Elections | Password Reset Notification',
-      `Your new password is: ${plainPassword}`,
+      `Your new password is: ${plainPassword}`
     );
+  }
+
+  async getUsers() {
+    const users = await User.find();
+    return users;
   }
 }
 

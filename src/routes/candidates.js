@@ -1,14 +1,16 @@
 const router = require('express').Router();
 const bodyParser = require('body-parser');
 const _ = require('lodash');
-const { tokenMiddleware } = require('controllers/AuthController');
-const candidateModel = require('models/candidate');
-const CRUD = require('controllers/CRUDController');
+const {
+  tokenMiddleware,
+  adminMiddleware,
+} = require('controllers/AuthController');
+const CandidateController = require('controllers/CandidateController');
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
-const controller = new CRUD(candidateModel);
+const controller = new CandidateController();
 const candidateFields = [
   'fname',
   'lname',
@@ -76,6 +78,17 @@ router.delete('/:id', tokenMiddleware, async (req, res) => {
     res.json({ message: 'Deleted successfully.' });
   } catch ({ code, message }) {
     res.status(code).json({ message });
+  }
+});
+
+router.post('/export', tokenMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { newOnly } = req.body;
+    const candidates = await controller.generateCSV(newOnly);
+    res.setHeader('Content-Type', 'text/csv');
+    res.send(candidates);
+  } catch ({ message, code }) {
+    res.status(500).json(message);
   }
 });
 

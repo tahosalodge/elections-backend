@@ -67,7 +67,7 @@ const candidateSchema = new Schema({
   notified: {
     type: Date,
   },
-  imported: {
+  exported: {
     type: Boolean,
   },
 });
