@@ -24,6 +24,9 @@ class CandidateController extends CRUDController {
     const candidates = await this.Model.find(params).lean();
     const units = await this.UnitController.get();
     const elections = await this.ElectionController.get();
+    if (candidates.length === 0) {
+      throw createError('No candidates to export.', 400);
+    }
     const fields = [
       {
         label: 'First Name',
@@ -102,6 +105,11 @@ class CandidateController extends CRUDController {
       },
     ];
     const csv = json2csv(candidates, { fields });
+    if (newOnly) {
+      candidates.forEach(({ _id }) => {
+        this.update(_id, { exported: new Date() });
+      });
+    }
     return csv;
   }
 }

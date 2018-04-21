@@ -88,7 +88,7 @@ router.post('/export', tokenMiddleware, adminMiddleware, async (req, res) => {
     res.setHeader('Content-Type', 'text/csv');
     res.send(candidates);
   } catch ({ message, code }) {
-    res.status(500).json(message);
+    res.status(code).json({ message });
   }
 });
 
