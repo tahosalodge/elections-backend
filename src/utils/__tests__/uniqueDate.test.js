@@ -1,5 +1,5 @@
 /* eslint-env jest */
-const uniqueDate = require('helpers/uniqueDate');
+const uniqueDate = require('utils/uniqueDate');
 
 describe('uniqueDate validation', () => {
   it('should throw an error if input is undefined', () => {

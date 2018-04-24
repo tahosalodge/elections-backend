@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-const createError = require('helpers/error');
+const createError = require('utils/error');
 
 describe('createError', () => {
   it('should return an error object with a message and code', () => {
