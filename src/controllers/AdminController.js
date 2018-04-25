@@ -1,14 +1,21 @@
+const { parseLocation } = require('parse-address');
+
 const Unit = require('models/unit');
 const User = require('models/user');
 const Election = require('models/election');
 const Candidate = require('models/candidate');
 const CRUD = require('controllers/CRUDController');
-const axios = require('axios');
-const { parseLocation } = require('parse-address');
-const csv = require('neat-csv');
-const Notify = require('helpers/notify');
-const createError = require('helpers/error');
 const Auth = require('controllers/AuthController');
+const csv = require('neat-csv');
+const Notify = require('utils/notify');
+const createError = require('utils/error');
+const {
+  getActiveMembers,
+  getAddress,
+  getChapter,
+  getOldElection,
+  getElectionValue,
+} = require('utils/import');
 
 class AdminController {
   constructor() {
@@ -16,75 +23,6 @@ class AdminController {
     this.user = User;
     this.election = Election;
     this.candidateController = new CRUD(Candidate);
-  }
-  static getElectionValue(unitFields, prefix, value) {
-    const key = `_oa_election_${prefix}_${value}`;
-    return unitFields[key];
-  }
-
-  static async getOldElection(id) {
-    const apiUrl = process.env.IMPORT_URL;
-    return axios(`${apiUrl}/${id}`);
-  }
-
-  static getChapter(unitFields) {
-    const chapterId = AdminController.getElectionValue(unitFields, 'unit', 'chapter');
-    const chapters = {
-      27: 'white-eagle',
-      30: 'medicine-bear',
-      29: 'medicine-pipe',
-      25: 'running-antelope',
-      31: 'kodiak',
-      26: 'spirit-eagle',
-      28: 'white-buffalo',
-    };
-
-    return chapters[chapterId];
-  }
-
-  static getAddress(unitFields) {
-    const address = {
-      address1: '',
-      city: '',
-      state: '',
-      zip: '',
-      notes: AdminController.getElectionValue(unitFields, 'unit', 'location_details'),
-      original: AdminController.getElectionValue(unitFields, 'unit', 'address_text'),
-    };
-    const parsedAddress = parseLocation(address.original);
-    if (parsedAddress === null) {
-      return {};
-    }
-    if (parsedAddress.number) {
-      address.address1 = parsedAddress.number;
-    }
-    if (parsedAddress.prefix) {
-      address.address1 = `${address.address1} ${parsedAddress.prefix}`;
-    }
-    if (parsedAddress.street) {
-      address.address1 = `${address.address1} ${parsedAddress.street}`;
-    }
-    if (parsedAddress.type) {
-      address.address1 = `${address.address1} ${parsedAddress.type}`;
-    }
-    if (parsedAddress.city) {
-      address.city = parsedAddress.city;
-    }
-    if (parsedAddress.state) {
-      address.state = parsedAddress.state;
-    }
-    if (parsedAddress.zip) {
-      address.zip = parsedAddress.zip;
-    }
-    return address;
-  }
-
-  static getActiveMembers(unitFields) {
-    const attendance = AdminController.getElectionValue(unitFields, 'unit', 'attendance');
-    if (Math.abs(attendance) === 'NaN') {
-      return 0;
-    }
-    return Math.abs(attendance);
   }
 
   static async createImportUser(unit) {
@@ -109,7 +47,7 @@ class AdminController {
 
         Please verify that your unit information was accurately imported from last year.<br />
         If you are no longer involved with this unit, please reply so we can connect with the right person.<br />
-        If you have any questions or issues, please contact us at elections@tahosalodge.org.`,
+        If you have any questions or issues, please contact us at elections@tahosalodge.org.`
     );
 
     return user;
@@ -118,36 +56,38 @@ class AdminController {
   // eslint-disable-next-line
   async importUnit(oldId) {
     // Get data from old election site
-    const oldElection = await AdminController.getOldElection(oldId);
+    const oldElection = await getOldElection(oldId);
     const { data: { cmb2: { unit_fields: unitFields } } } = oldElection;
-    const address = parseLocation(AdminController.getElectionValue(unitFields, 'unit', 'address_text'));
+    const address = parseLocation(
+      getElectionValue(unitFields, 'unit', 'address_text')
+    );
     // Parse to modify/remove anything
     const unit = {
-      number: AdminController.getElectionValue(unitFields, 'unit', 'number'),
-      chapter: AdminController.getChapter(unitFields),
-      activeMembers: AdminController.getActiveMembers(unitFields) || 0,
+      number: getElectionValue(unitFields, 'unit', 'number'),
+      chapter: getChapter(unitFields),
+      activeMembers: getActiveMembers(unitFields) || 0,
       address,
-      meetingLocation: AdminController.getAddress(unitFields),
-      meetingTime: AdminController.getElectionValue(unitFields, 'unit', 'meeting_time'),
-      announce: AdminController.getElectionValue(unitFields, 'unit', 'callout_timing'),
+      meetingLocation: getAddress(unitFields),
+      meetingTime: getElectionValue(unitFields, 'unit', 'meeting_time'),
+      announce: getElectionValue(unitFields, 'unit', 'callout_timing'),
       unitLeader: {
-        fname: AdminController.getElectionValue(unitFields, 'leader', 'fname'),
-        lname: AdminController.getElectionValue(unitFields, 'leader', 'lname'),
-        phone: AdminController.getElectionValue(unitFields, 'leader', 'phone'),
-        email: AdminController.getElectionValue(unitFields, 'leader', 'email'),
-        involvement: AdminController.getElectionValue(unitFields, 'leader', 'involvement'),
+        fname: getElectionValue(unitFields, 'leader', 'fname'),
+        lname: getElectionValue(unitFields, 'leader', 'lname'),
+        phone: getElectionValue(unitFields, 'leader', 'phone'),
+        email: getElectionValue(unitFields, 'leader', 'email'),
+        involvement: getElectionValue(unitFields, 'leader', 'involvement'),
       },
       adultRepresentative: {
-        fname: AdminController.getElectionValue(unitFields, 'unit_adviser', 'fname'),
-        lname: AdminController.getElectionValue(unitFields, 'unit_adviser', 'lname'),
-        phone: AdminController.getElectionValue(unitFields, 'unit_adviser', 'phone'),
-        email: AdminController.getElectionValue(unitFields, 'unit_adviser', 'email'),
+        fname: getElectionValue(unitFields, 'unit_adviser', 'fname'),
+        lname: getElectionValue(unitFields, 'unit_adviser', 'lname'),
+        phone: getElectionValue(unitFields, 'unit_adviser', 'phone'),
+        email: getElectionValue(unitFields, 'unit_adviser', 'email'),
       },
       youthRepresentative: {
-        fname: AdminController.getElectionValue(unitFields, 'unit_representative', 'fname'),
-        lname: AdminController.getElectionValue(unitFields, 'unit_representative', 'lname'),
-        phone: AdminController.getElectionValue(unitFields, 'unit_representative', 'phone'),
-        email: AdminController.getElectionValue(unitFields, 'unit_representative', 'email'),
+        fname: getElectionValue(unitFields, 'unit_representative', 'fname'),
+        lname: getElectionValue(unitFields, 'unit_representative', 'lname'),
+        phone: getElectionValue(unitFields, 'unit_representative', 'phone'),
+        email: getElectionValue(unitFields, 'unit_representative', 'email'),
       },
     };
     const existingUser = await User.findOne({ email: unit.unitLeader.email });
@@ -181,9 +121,14 @@ class AdminController {
           return map;
         }
         if (dryRun) {
-          return `Update to be made: { _id: ${user._id} } { unit: ${unit._id} }`;
+          return `Update to be made: { _id: ${user._id} } { unit: ${
+            unit._id
+          } }`;
         }
-        return this.user.findOneAndUpdate({ _id: user._id }, { unit: unit._id });
+        return this.user.findOneAndUpdate(
+          { _id: user._id },
+          { unit: unit._id }
+        );
       }, []);
       return updatedUsers;
     } catch (error) {
@@ -194,9 +139,7 @@ class AdminController {
   // eslint-disable-next-line
   async createUser(data) {
     const user = await Auth.generateUser(data);
-    const {
-      fname, email, plainPass, capability, chapter,
-    } = user;
+    const { fname, email, plainPass, capability, chapter } = user;
     new Notify(email).sendEmail(
       'Tahosa Lodge Elections - Account Created',
       `Hey ${fname},<br />
@@ -207,21 +150,26 @@ class AdminController {
         Access Level: ${capability}<br />
         Chapter: ${chapter}<br /><br />
 
-        If you have any questions or issues, please contact us at elections@tahosalodge.org.`,
+        If you have any questions or issues, please contact us at elections@tahosalodge.org.`
     );
     return user;
   }
 
   async linkElectionToChapter(dryRun) {
     try {
-      const elections = await this.election.find({ chapter: { $exists: false } }, []).lean();
+      const elections = await this.election
+        .find({ chapter: { $exists: false } }, [])
+        .lean();
       const updatedElections = elections.map(async ({ _id, unitId }) => {
         const unit = await this.unit.findById(unitId).lean();
         if (!unit) {
           return `No unit for ${_id}`;
         }
         if (!dryRun) {
-          await this.election.findOneAndUpdate({ _id }, { chapter: unit.chapter });
+          await this.election.findOneAndUpdate(
+            { _id },
+            { chapter: unit.chapter }
+          );
         }
         return `Update election ${_id} to have chapter ${unit.chapter}.`;
       });
@@ -235,7 +183,7 @@ class AdminController {
   async candidateImport(file, electionId, chapter, unitId) {
     const status = 'Eligible';
     const parsed = await csv(file.data.toString());
-    const candidates = parsed.filter(row => row.bsaid !== '').map((row) => {
+    const candidates = parsed.filter(row => row.bsaid !== '').map(row => {
       const candidate = {
         address: {},
         electionId,
@@ -244,7 +192,7 @@ class AdminController {
         unitId,
         imported: true,
       };
-      Object.keys(row).forEach((key) => {
+      Object.keys(row).forEach(key => {
         if (key.indexOf('address.') !== -1) {
           const addressKey = key.split('.')[1];
           candidate.address[addressKey] = row[key];
@@ -264,7 +212,9 @@ class AdminController {
       return candidate;
     });
 
-    await candidates.forEach(async candidate => this.candidateController.create(candidate));
+    await candidates.forEach(async candidate =>
+      this.candidateController.create(candidate)
+    );
     return candidates;
   }
 }

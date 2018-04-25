@@ -1,4 +1,4 @@
-const createError = require('helpers/error');
+const createError = require('utils/error');
 
 class CRUDController {
   constructor(Model) {

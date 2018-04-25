@@ -1,5 +1,5 @@
 const { parse } = require('date-fns');
-const createError = require('helpers/error');
+const createError = require('utils/error');
 
 function uniqueElectionDate(dates) {
   if (typeof dates === 'undefined') {

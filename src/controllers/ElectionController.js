@@ -1,12 +1,12 @@
 const { format } = require('date-fns');
 const unitModel = require('models/unit');
 const userModel = require('models/user');
-const createError = require('helpers/error');
-const Notify = require('helpers/notify');
+const createError = require('utils/error');
+const Notify = require('utils/notify');
 const CRUDController = require('controllers/CRUDController');
 const ElectionModel = require('models/election');
 const CandidateModel = require('models/candidate');
-const uniqueElectionDate = require('helpers/uniqueDate');
+const uniqueElectionDate = require('utils/uniqueDate');
 
 class ElectionController extends CRUDController {
   constructor() {

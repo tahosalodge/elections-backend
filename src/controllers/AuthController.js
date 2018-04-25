@@ -1,37 +1,15 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const generatePassword = require('xkpasswd');
-const Notify = require('helpers/notify');
-const createError = require('helpers/error');
+
+const Notify = require('utils/notify');
+const createError = require('utils/error');
+const { sendUserInfo } = require('utils/auth');
 const User = require('models/user');
 
 class AuthController {
   constructor() {
     this.user = User;
-  }
-
-  static sendUserInfo(user) {
-    const { fname, lname, capability, email, chapter, unit } = user;
-    const token = AuthController.createToken(user);
-    const userInfo = {
-      token,
-      fname,
-      lname,
-      capability,
-      email,
-      chapter,
-      unit,
-    };
-    return userInfo;
-  }
-
-  static createToken(user) {
-    const { _id: userId, capability: userCap, unit: userUnit } = user;
-    const tokenVars = { userId, userCap };
-    if (userCap === 'unit') {
-      tokenVars.userUnit = userUnit;
-    }
-    return jwt.sign(tokenVars, process.env.JWT_SECRET, { expiresIn: 86400 });
   }
 
   async login(email, password) {
@@ -46,7 +24,7 @@ class AuthController {
     if (!passwordIsValid) {
       throw createError('Password Incorrect', 401);
     }
-    return AuthController.sendUserInfo(user);
+    return sendUserInfo(user);
   }
 
   async register(userInfo) {
@@ -61,7 +39,7 @@ class AuthController {
         'Thanks for registering with Tahosa Lodge Elections',
         `Hey ${fname}, thanks for registering with Tahosa Lodge Elections. If you have any questions or issues, please contact us at elections@tahosalodge.org.`
       );
-      return AuthController.sendUserInfo(user);
+      return sendUserInfo(user);
     } catch ({ message }) {
       throw createError(400, message);
     }
@@ -72,7 +50,7 @@ class AuthController {
     if (!user) {
       throw createError('No user found.', 404);
     }
-    return AuthController.sendUserInfo(user);
+    return sendUserInfo(user);
   }
 
   static async tokenMiddleware(req, res, next) {
