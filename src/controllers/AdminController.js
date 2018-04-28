@@ -181,41 +181,45 @@ class AdminController {
   }
 
   async candidateImport(file, electionId, chapter, unitId) {
-    const status = 'Eligible';
-    const parsed = await csv(file.data.toString());
-    const candidates = parsed.filter(row => row.bsaid !== '').map(row => {
-      const candidate = {
-        address: {},
-        electionId,
-        chapter,
-        status,
-        unitId,
-        imported: true,
-      };
-      Object.keys(row).forEach(key => {
-        if (key.indexOf('address.') !== -1) {
-          const addressKey = key.split('.')[1];
-          candidate.address[addressKey] = row[key];
-          return;
-        }
-        if (key === 'youthEmail' && row.youthEmail === row.parentEmail) {
-          return;
-        }
-        if (key === 'youthPhone' && row.youthPhone === row.parentPhone) {
-          return;
-        }
-        if (row[key] === '') {
-          return;
-        }
-        candidate[key] = row[key];
+    try {
+      const status = 'Eligible';
+      const parsed = await csv(file.data.toString());
+      const candidates = parsed.filter(row => row.bsaid !== '').map(row => {
+        const candidate = {
+          address: {},
+          electionId,
+          chapter,
+          status,
+          unitId,
+          imported: true,
+        };
+        Object.keys(row).forEach(key => {
+          if (key.indexOf('address.') !== -1) {
+            const addressKey = key.split('.')[1];
+            candidate.address[addressKey] = row[key];
+            return;
+          }
+          if (key === 'youthEmail' && row.youthEmail === row.parentEmail) {
+            return;
+          }
+          if (key === 'youthPhone' && row.youthPhone === row.parentPhone) {
+            return;
+          }
+          if (row[key] === '') {
+            return;
+          }
+          candidate[key] = row[key];
+        });
+        return candidate;
       });
-      return candidate;
-    });
 
-    await candidates.forEach(async candidate =>
-      this.candidateController.create(candidate)
-    );
-    return candidates;
+      await candidates.forEach(async candidate =>
+        this.candidateController.create(candidate)
+      );
+      return candidates;
+    } catch (error) {
+      throw createError(error.message, 400);
+    }
   }
 }
 
