@@ -7,7 +7,7 @@ const Candidate = require('models/candidate');
 const CRUD = require('controllers/CRUDController');
 const Auth = require('controllers/AuthController');
 const csv = require('neat-csv');
-const Notify = require('utils/notify');
+const { templateSender } = require('utils/email');
 const createError = require('utils/error');
 const {
   getActiveMembers,
@@ -140,18 +140,13 @@ class AdminController {
   async createUser(data) {
     const user = await Auth.generateUser(data);
     const { fname, email, plainPass, capability, chapter } = user;
-    new Notify(email).sendEmail(
-      'Tahosa Lodge Elections - Account Created',
-      `Hey ${fname},<br />
-        An account has been created for you, login at https://elections.tahosa.co/login with the following credentials:<br /><br />
-
-        User: ${email}<br />
-        Password: ${plainPass}<br />
-        Access Level: ${capability}<br />
-        Chapter: ${chapter}<br /><br />
-
-        If you have any questions or issues, please contact us at elections@tahosalodge.org.`
-    );
+    templateSender(email, 'createdUser', {
+      fname,
+      email,
+      password: plainPass,
+      capability,
+      chapter,
+    });
     return user;
   }
 
@@ -212,7 +207,6 @@ class AdminController {
         });
         return candidate;
       });
-
       await candidates.forEach(async candidate =>
         this.candidateController.create(candidate)
       );
