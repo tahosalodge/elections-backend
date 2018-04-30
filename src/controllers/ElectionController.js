@@ -15,7 +15,7 @@ class ElectionController extends CRUDController {
 
   static electionCreateNotificationUnit(params) {
     const { requestedDates, email } = params;
-    const dates = requestedDates.map(date => format(date), 'MM/DD?YYYY');
+    const dates = requestedDates.map(date => format(date), 'MM/DD/YYYY');
     templateSender(email, 'unit/requestElection', {
       ...params,
       dates,
@@ -24,7 +24,7 @@ class ElectionController extends CRUDController {
 
   static async electionCreateNotificationChapter(params) {
     const { requestedDates, chapter } = params;
-    const dates = requestedDates.map(date => format(date), 'MM/DD?YYYY');
+    const dates = requestedDates.map(date => format(date), 'MM/DD/YYYY');
     const users = await userModel.find({ chapter, capability: 'chapter' });
     emailToUsers(users, 'chapter/requestElection', {
       ...params,
