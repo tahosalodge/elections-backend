@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const generatePassword = require('xkpasswd');
 
-// const Notify = require('utils/notify');
+const { templateSender } = require('utils/email');
 const createError = require('utils/error');
 const { sendUserInfo } = require('utils/auth');
 const User = require('models/user');
@@ -35,10 +35,7 @@ class AuthController {
         password: bcrypt.hashSync(password, 8),
       };
       const user = await this.user.create(toCreate);
-      // await new Notify(email).sendEmail(
-      //   'Thanks for registering with Tahosa Lodge Elections',
-      //   `Hey ${fname}, thanks for registering with Tahosa Lodge Elections. If you have any questions or issues, please contact us at elections@tahosalodge.org.`
-      // );
+      templateSender(email, 'auth/register', { fname });
       return sendUserInfo(user);
     } catch ({ message }) {
       throw createError(400, message);
@@ -105,10 +102,7 @@ class AuthController {
     const plainPassword = generatePassword({ separators: '-' });
     const password = bcrypt.hashSync(plainPassword, 8);
     await User.findOneAndUpdate({ email }, { password });
-    // await new Notify(email).sendEmail(
-    //   'Tahosa Elections | Password Reset Notification',
-    //   `Your new password is: ${plainPassword}`
-    // );
+    templateSender(email, 'auth/resetPassword', { password: plainPassword });
   }
 
   async getUsers() {

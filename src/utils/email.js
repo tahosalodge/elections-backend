@@ -56,7 +56,7 @@ const email = new Email({
       extension: 'nunjucks',
     },
   },
-  subjectPrefix: 'Tahosa Lodge Elections',
+  subjectPrefix: 'Tahosa Lodge Elections | ',
   preview: false,
 });
 
