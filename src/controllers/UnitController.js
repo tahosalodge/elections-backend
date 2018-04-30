@@ -1,7 +1,7 @@
 const CRUDController = require('controllers/CRUDController');
 const AuthController = require('controllers/AuthController');
 const createError = require('utils/error');
-const Notify = require('utils/notify');
+const { templateSender } = require('utils/email');
 const UnitModel = require('models/unit');
 
 class UnitController extends CRUDController {
@@ -18,11 +18,14 @@ class UnitController extends CRUDController {
     try {
       const unit = await this.Model.create(unitParams);
       if (userCap === 'unit') {
-        const user = await AuthController.updateUser(userId, { unit: unit._id });
-        const message = `Hey ${user.fname}, your unit ${
-          unit.number
-        } has been created. You can access it here: https://elections.tahosa.co/units/${unit._id}.`;
-        new Notify(user.email).sendEmail('Tahosa Lodge Elections - Unit Created', message);
+        const user = await AuthController.updateUser(userId, {
+          unit: unit._id,
+        });
+        templateSender(user.email, 'unit/electionImport', {
+          fname: user.fname,
+          number: unit.number,
+          unitId: unit._id,
+        });
       }
       return unit;
     } catch (e) {
