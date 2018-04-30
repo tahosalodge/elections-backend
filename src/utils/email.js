@@ -81,4 +81,19 @@ const templateSender = (to, template, locals) => {
     .catch(error => console.log(error));
 };
 
-module.exports = { sendEmail, templateSender };
+/**
+ * Send email to array of users
+ * @param {Array} users Array of users
+ * @param {String} template path to template
+ * @param {Object} locals variables to pass to the template
+ */
+const emailToUsers = (users, template, locals) => {
+  if (!users || users.length === 0) {
+    return;
+  }
+  users.forEach(user => {
+    templateSender(user.email, template, locals);
+  });
+};
+
+module.exports = { sendEmail, templateSender, emailToUsers };
