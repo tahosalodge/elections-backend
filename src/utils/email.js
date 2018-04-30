@@ -60,6 +60,12 @@ const email = new Email({
   preview: false,
 });
 
+/**
+ * Send an email with a template
+ * @param {String} to email recipient
+ * @param {String} template path to template
+ * @param {Object} locals variables to pass to the template
+ */
 const templateSender = (to, template, locals) => {
   email
     .send({

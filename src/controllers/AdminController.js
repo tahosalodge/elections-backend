@@ -28,28 +28,19 @@ class AdminController {
   static async createImportUser(unit) {
     const { chapter, unitLeader, number } = unit;
     const { fname, lname, email } = unitLeader;
-    const createuserData = {
+    const userData = {
       fname,
       lname,
       email,
       chapter,
       capability: 'unit',
     };
-    const user = await Auth.generateUser(createuserData);
-    new Notify(email).sendEmail(
-      `Tahosa Lodge Elections - Unit Import Notification for Troop ${number}`,
-      `Hey ${fname},<br />
-        Thank you for having a unit election in 2017. We have successfully imported your information from Troop ${number} from last year, and you may now log in and request an election for 2018.<br />
-        Login at https://elections.tahosa.co with the following credentials:<br /><br />
-
-        User: ${email}<br />
-        Password: ${user.plainPass}<br /><br />
-
-        Please verify that your unit information was accurately imported from last year.<br />
-        If you are no longer involved with this unit, please reply so we can connect with the right person.<br />
-        If you have any questions or issues, please contact us at elections@tahosalodge.org.`
-    );
-
+    const user = await Auth.generateUser(userData);
+    templateSender(email, 'unit/electionImport', {
+      ...userData,
+      number,
+      password: user.plainPass,
+    });
     return user;
   }
 
