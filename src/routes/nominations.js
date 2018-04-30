@@ -2,13 +2,12 @@ const router = require('express').Router();
 const bodyParser = require('body-parser');
 const _ = require('lodash');
 const { tokenMiddleware } = require('controllers/AuthController');
-const nominationModel = require('models/nomination');
-const CRUD = require('controllers/CRUDController');
+const NominationController = require('controllers/NominationController');
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
-const controller = new CRUD(nominationModel);
+const controller = new NominationController();
 const nominationFields = [
   'fname',
   'lname',

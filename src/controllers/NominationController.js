@@ -5,12 +5,13 @@ const CRUDController = require('controllers/CRUDController');
 const UnitController = require('controllers/UnitController');
 const ElectionController = require('controllers/ElectionController');
 const createError = require('utils/error');
-const CandidateModel = require('models/candidate');
+const { templateSender } = require('utils/email');
+const NominationModel = require('models/nomination');
 const { chapters } = require('constants/values');
 
 class NominationController extends CRUDController {
   constructor() {
-    super(CandidateModel);
+    super(NominationModel);
     this.UnitController = new UnitController();
     this.ElectionController = new ElectionController();
   }
@@ -102,6 +103,19 @@ class NominationController extends CRUDController {
       });
     }
     return csv;
+  }
+
+  async update(_id, patch) {
+    try {
+      const nomination = await this.Model.findOneAndUpdate({ _id }, patch);
+      const { email, status } = nomination;
+      if (status === 'Approved') {
+        templateSender(email, 'nomination/approved', nomination);
+      }
+      return nomination;
+    } catch ({ message }) {
+      throw createError(message);
+    }
   }
 }
 
