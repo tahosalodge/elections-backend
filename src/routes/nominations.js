@@ -1,7 +1,10 @@
 const router = require('express').Router();
 const bodyParser = require('body-parser');
 const _ = require('lodash');
-const { tokenMiddleware } = require('controllers/AuthController');
+const {
+  tokenMiddleware,
+  adminMiddleware,
+} = require('controllers/AuthController');
 const NominationController = require('controllers/NominationController');
 
 router.use(bodyParser.urlencoded({ extended: false }));
@@ -78,6 +81,19 @@ router.delete('/:id', tokenMiddleware, async (req, res) => {
     await controller.remove(id);
     res.json({ message: 'Deleted successfully.' });
   } catch ({ code, message }) {
+    res.status(code).json({ message });
+  }
+});
+
+router.post('/export', tokenMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { newOnly } = req.body;
+    const nominations = await controller.generateCSV(newOnly);
+    res.setHeader('Content-Type', 'text/csv');
+    res.send(nominations);
+  } catch (error) {
+    console.log(error);
+    const { message, code } = error;
     res.status(code).json({ message });
   }
 });
