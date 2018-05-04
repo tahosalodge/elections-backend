@@ -1,5 +1,7 @@
 const mongoose = require('models/db');
-const { Schema } = require('mongoose');
+const {
+  Schema
+} = require('mongoose');
 
 const candidateSchema = new Schema({
   fname: {
@@ -50,11 +52,9 @@ const candidateSchema = new Schema({
   },
   campingLongTerm: {
     type: String,
-    required: true,
   },
   campingShortTerm: {
     type: String,
-    required: true,
   },
   chapter: {
     type: String,
