@@ -116,14 +116,10 @@ router.post(
       } = req.files;
       const {
         electionId,
-        chapter,
-        unitId
       } = req.body;
       const candidates = await admin.candidateImport(
         candidateCsv,
         electionId,
-        chapter,
-        unitId
       );
       res.json({
         message: `Imported ${candidates.length} candidates.`

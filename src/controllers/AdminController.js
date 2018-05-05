@@ -214,10 +214,20 @@ class AdminController {
     }
   }
 
-  async candidateImport(file, electionId, chapter, unitId) {
+  async candidateImport(file, electionId) {
     try {
       const status = 'Eligible';
       const parsed = await csv(file.data.toString());
+      const {
+        unitId
+      } = await Election.findOne({
+        _id: electionId,
+      });
+      const {
+        chapter
+      } = await Unit.findOne({
+        _id: unitId,
+      })
       const candidates = parsed.filter(row => row.bsaid !== '').map(row => {
         const candidate = {
           address: {},
@@ -249,7 +259,7 @@ class AdminController {
       try {
         await Candidate.insertMany(candidates);
       } catch (error) {
-        throw createError(error.message, 400);
+        throw error;
       }
       return candidates;
     } catch (error) {
