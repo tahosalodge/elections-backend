@@ -8,7 +8,9 @@ const {
 
 const admin = new AdminController();
 
-router.use(bodyParser.urlencoded({ extended: false }));
+router.use(bodyParser.urlencoded({
+  extended: false
+}));
 router.use(bodyParser.json());
 
 router.post(
@@ -16,11 +18,16 @@ router.post(
   tokenMiddleware,
   adminMiddleware,
   async (req, res) => {
-    const { oldId } = req.params;
+    const {
+      oldId
+    } = req.params;
     try {
       const unit = await admin.importUnit(oldId);
       res.json(unit);
-    } catch ({ message, code }) {
+    } catch ({
+      message,
+      code
+    }) {
       res.status(code || 500).json(message);
     }
   }
@@ -31,11 +38,16 @@ router.post(
   tokenMiddleware,
   adminMiddleware,
   async (req, res) => {
-    const { dryRun } = req.body;
+    const {
+      dryRun
+    } = req.body;
     try {
       const users = await admin.linkUsersToUnits(dryRun);
       res.json(users);
-    } catch ({ message, code }) {
+    } catch ({
+      message,
+      code
+    }) {
       res.status(500).json(message);
     }
   }
@@ -46,11 +58,16 @@ router.post(
   tokenMiddleware,
   adminMiddleware,
   async (req, res) => {
-    const { dryRun } = req.body;
+    const {
+      dryRun
+    } = req.body;
     try {
       const elections = await admin.linkElectionToChapter(dryRun);
       res.json(elections);
-    } catch ({ message, code }) {
+    } catch ({
+      message,
+      code
+    }) {
       res.status(500).json(message);
     }
   }
@@ -61,7 +78,13 @@ router.post(
   tokenMiddleware,
   adminMiddleware,
   async (req, res) => {
-    const { fname, lname, email, chapter, capability } = req.body;
+    const {
+      fname,
+      lname,
+      email,
+      chapter,
+      capability
+    } = req.body;
     try {
       await admin.createUser({
         fname,
@@ -70,8 +93,13 @@ router.post(
         chapter,
         capability,
       });
-      res.json({ email });
-    } catch ({ message, code }) {
+      res.json({
+        email
+      });
+    } catch ({
+      message,
+      code
+    }) {
       res.status(500).json(message);
     }
   }
@@ -83,17 +111,28 @@ router.post(
   adminMiddleware,
   async (req, res) => {
     try {
-      const { candidateCsv } = req.files;
-      const { electionId, chapter, unitId } = req.body;
+      const {
+        candidateCsv
+      } = req.files;
+      const {
+        electionId,
+        chapter,
+        unitId
+      } = req.body;
       const candidates = await admin.candidateImport(
         candidateCsv,
         electionId,
         chapter,
         unitId
       );
-      res.json({ message: `Imported ${candidates.length} candidates.` });
-    } catch ({ message, code }) {
-      res.status(500).json(message);
+      res.json({
+        message: `Imported ${candidates.length} candidates.`
+      });
+    } catch ({
+      message,
+      code
+    }) {
+      res.status(code).json(message);
     }
   }
 );

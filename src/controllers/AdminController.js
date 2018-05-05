@@ -1,4 +1,6 @@
-const { parseLocation } = require('parse-address');
+const {
+  parseLocation
+} = require('parse-address');
 
 const Unit = require('models/unit');
 const User = require('models/user');
@@ -7,7 +9,9 @@ const Candidate = require('models/candidate');
 const CRUD = require('controllers/CRUDController');
 const Auth = require('controllers/AuthController');
 const csv = require('neat-csv');
-const { templateSender } = require('utils/email');
+const {
+  templateSender
+} = require('utils/email');
 const createError = require('utils/error');
 const {
   getActiveMembers,
@@ -22,12 +26,21 @@ class AdminController {
     this.unit = Unit;
     this.user = User;
     this.election = Election;
+    this.candidate = Candidate;
     this.candidateController = new CRUD(Candidate);
   }
 
   static async createImportUser(unit) {
-    const { chapter, unitLeader, number } = unit;
-    const { fname, lname, email } = unitLeader;
+    const {
+      chapter,
+      unitLeader,
+      number
+    } = unit;
+    const {
+      fname,
+      lname,
+      email
+    } = unitLeader;
     const userData = {
       fname,
       lname,
@@ -48,7 +61,13 @@ class AdminController {
   async importUnit(oldId) {
     // Get data from old election site
     const oldElection = await getOldElection(oldId);
-    const { data: { cmb2: { unit_fields: unitFields } } } = oldElection;
+    const {
+      data: {
+        cmb2: {
+          unit_fields: unitFields
+        }
+      }
+    } = oldElection;
     const address = parseLocation(
       getElectionValue(unitFields, 'unit', 'address_text')
     );
@@ -81,8 +100,12 @@ class AdminController {
         email: getElectionValue(unitFields, 'unit_representative', 'email'),
       },
     };
-    const existingUser = await User.findOne({ email: unit.unitLeader.email });
-    const existingUnit = await Unit.findOne({ number: unit.number });
+    const existingUser = await User.findOne({
+      email: unit.unitLeader.email
+    });
+    const existingUnit = await Unit.findOne({
+      number: unit.number
+    });
     if (existingUser !== null) {
       throw new Error(`User ${unit.unitLeader.email} already exists`);
     }
@@ -90,23 +113,33 @@ class AdminController {
       throw new Error(`Unit #${unit.number} already exists.`);
     }
     const newUnit = await Unit.create(unit);
-    const { _id: userId } = await AdminController.createImportUser(unit);
+    const {
+      _id: userId
+    } = await AdminController.createImportUser(unit);
     unit.users = [userId];
-    await User.findOneAndUpdate({ _id: userId }, { unit: newUnit._id });
+    await User.findOneAndUpdate({
+      _id: userId
+    }, {
+      unit: newUnit._id
+    });
     return unit;
   }
 
   async linkUsersToUnits(dryRun) {
     const params = {
       capability: 'unit',
-      unit: { $exists: false },
+      unit: {
+        $exists: false
+      },
     };
     try {
       // find users without a unit
       const users = await this.user.find(params);
       // loop through users, and see if a unit exists
       const updatedUsers = users.reduce(async (map, user) => {
-        const unitParams = { users: String(user._id) };
+        const unitParams = {
+          users: String(user._id)
+        };
         const unit = await this.unit.findOne(unitParams);
         if (!unit) {
           return map;
@@ -116,10 +149,11 @@ class AdminController {
             unit._id
           } }`;
         }
-        return this.user.findOneAndUpdate(
-          { _id: user._id },
-          { unit: unit._id }
-        );
+        return this.user.findOneAndUpdate({
+          _id: user._id
+        }, {
+          unit: unit._id
+        });
       }, []);
       return updatedUsers;
     } catch (error) {
@@ -130,7 +164,13 @@ class AdminController {
   // eslint-disable-next-line
   async createUser(data) {
     const user = await Auth.generateUser(data);
-    const { fname, email, plainPass, capability, chapter } = user;
+    const {
+      fname,
+      email,
+      plainPass,
+      capability,
+      chapter
+    } = user;
     templateSender(email, 'createdUser', {
       fname,
       email,
@@ -144,18 +184,26 @@ class AdminController {
   async linkElectionToChapter(dryRun) {
     try {
       const elections = await this.election
-        .find({ chapter: { $exists: false } }, [])
+        .find({
+          chapter: {
+            $exists: false
+          }
+        }, [])
         .lean();
-      const updatedElections = elections.map(async ({ _id, unitId }) => {
+      const updatedElections = elections.map(async ({
+        _id,
+        unitId
+      }) => {
         const unit = await this.unit.findById(unitId).lean();
         if (!unit) {
           return `No unit for ${_id}`;
         }
         if (!dryRun) {
-          await this.election.findOneAndUpdate(
-            { _id },
-            { chapter: unit.chapter }
-          );
+          await this.election.findOneAndUpdate({
+            _id
+          }, {
+            chapter: unit.chapter
+          });
         }
         return `Update election ${_id} to have chapter ${unit.chapter}.`;
       });
@@ -198,9 +246,11 @@ class AdminController {
         });
         return candidate;
       });
-      await candidates.forEach(async candidate =>
-        this.candidateController.create(candidate)
-      );
+      try {
+        await Candidate.insertMany(candidates);
+      } catch (error) {
+        throw createError(error.message, 400);
+      }
       return candidates;
     } catch (error) {
       throw createError(error.message, 400);
