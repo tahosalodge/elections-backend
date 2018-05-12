@@ -227,7 +227,7 @@ class AdminController {
         chapter
       } = await Unit.findOne({
         _id: unitId,
-      })
+      });
       const candidates = parsed.filter(row => row.bsaid !== '').map(row => {
         const candidate = {
           address: {},

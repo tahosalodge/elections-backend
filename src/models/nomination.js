@@ -1,5 +1,7 @@
 const mongoose = require('models/db');
-const { Schema } = require('mongoose');
+const {
+  Schema
+} = require('mongoose');
 
 const nominationSchema = new Schema({
   fname: {
@@ -59,6 +61,9 @@ const nominationSchema = new Schema({
     required: true,
   },
   notified: {
+    type: Date,
+  },
+  exported: {
     type: Date,
   },
 });
